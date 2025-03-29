@@ -10,9 +10,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
   app.enableCors({
-    origin: ['*'], // Faqat frontend URL'ga ruxsat beramiz
-    credentials: true, // Cookie va authentication uchun kerak
+    origin: ['https://it-experts-one.vercel.app', 'http://localhost:3030'], // Ruxsat berilgan frontend domeni
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
+
   const config = new DocumentBuilder()
     .setTitle('Auth API')
     .setDescription('NestJS Authentication API')
