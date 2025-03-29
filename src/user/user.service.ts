@@ -10,7 +10,9 @@ export class UserService {
   ) {}
 
   async getAllUsers() {
-    return this.userRepository.find();
+    return this.userRepository.find({
+      relations: ['profile'],
+    });
   }
 
   async getUserById(id: number) {

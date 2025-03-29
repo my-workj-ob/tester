@@ -65,13 +65,22 @@ export class ProfileService {
 
     return { message: 'Parol muvaffaqiyatli yangilandi' };
   }
+
   async getProfile(userId: number): Promise<Profile> {
-    console.log(userId);
+    console.log('User ID:', userId);
+
+    // Profilni user bilan birga topamiz
     const profile = await this.profileRepository.findOne({
       where: { id: userId },
+      relations: ['user'], // Profilga bog‘langan user ma’lumotlarini yuklash
     });
-    console.log('Profile:', profile); // Log the profile object
-    if (!profile) throw new NotFoundException('Profile not found');
+
+    console.log('Profile:', profile); // Profil logi
+
+    if (!profile) {
+      throw new NotFoundException('Profile not found');
+    }
+
     return profile;
   }
 
