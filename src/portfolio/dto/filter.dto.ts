@@ -53,5 +53,5 @@ export class PortfolioFilterDto {
   })
   @IsOptional()
   @IsString()
-  sortBy?: 'trending' | 'newest' | 'most_liked' | 'most_viewed';
+  sortBy?: 'trending' | 'newest' | 'most_liked' | 'most_viewed' | 'category';
 }

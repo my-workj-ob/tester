@@ -1,5 +1,22 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsOptional, IsString, IsUrl } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import {
+  IsArray,
+  IsBoolean,
+  IsOptional,
+  IsString,
+  IsUrl,
+  ValidateNested,
+} from 'class-validator';
+class ImageDto {
+  @ApiProperty({ description: 'Image URL' })
+  @IsString()
+  url: string;
+
+  @ApiProperty({ description: 'Is this the main cover image?', default: false })
+  @IsBoolean()
+  isMain: boolean;
+}
 
 export class CreatePortfolioDto {
   @ApiProperty({ example: 'E-commerce Website', description: 'Loyiha nomi' })
@@ -23,11 +40,9 @@ export class CreatePortfolioDto {
   })
   commentsCount: number;
 
-  @ApiProperty({
-    example: 'boolean',
-    description: 'commentsCount',
-  })
-  ownProduct: boolean;
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  ownProduct?: boolean;
 
   @ApiProperty({
     example:
@@ -49,7 +64,20 @@ export class CreatePortfolioDto {
   imageUrl: string;
 
   @ApiProperty({ example: 1, description: 'Foydalanuvchi ID raqami' })
-  userId: number; // 🟢 userId qo‘shildi!
+  userId: number; // 🟢 userId qo‘shildi! @ApiProperty({ description: 'Is this project owned by the user?', default: true })
+  @IsBoolean()
+  ownProject: boolean;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsUrl()
+  liveDemoUrl?: string;
+
+  @ApiProperty()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ImageDto)
+  images: ImageDto[];
 }
 
 export class UpdatePortfolioDto {

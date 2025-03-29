@@ -13,9 +13,11 @@ async function bootstrap() {
     origin: (origin, callback) => {
       if (
         !origin ||
-        ['https://it-experts-one.vercel.app', 'http://localhost:3000'].includes(
-          origin,
-        )
+        [
+          'https://it-experts-one.vercel.app',
+          'http://localhost:3000',
+          'http://localhost:3030',
+        ].includes(origin)
       ) {
         callback(null, true);
       } else {

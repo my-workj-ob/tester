@@ -42,6 +42,7 @@ export class ProjectService {
     const portfolio = this.projectRepository.create({
       ...data,
       user,
+      ownProduct: true,
       profile,
     });
 
@@ -59,53 +60,45 @@ export class ProjectService {
     });
   }
   async getFilteredPortfolios(filters: PortfolioFilterDto) {
-    const query = this.projectRepository.createQueryBuilder('portfolio');
+    const query = this.projectRepository
+      .createQueryBuilder('portfolio')
+      .leftJoinAndSelect('portfolio.user', 'user')
+      .leftJoinAndSelect('user.profile', 'profile'); // user ning profilini ham chaqiramiz
 
-    if (filters.userId) {
-      query.andWhere('portfolio.userId = :userId', { userId: filters.userId });
+    // Agar ownProduct = true bo'lsa, userId bilan filter qilamiz
+    if (filters.ownProduct === true) {
+      query.where('portfolio.userId = :userId', { userId: filters.userId });
     }
-
-    if (filters.tags?.length) {
-      query.andWhere('portfolio.tags && :tags', { tags: filters.tags });
+    // Agar ownProduct = false bo'lsa, boshqa userlarning productlarini olish
+    else if (filters.ownProduct === false) {
+      query.where('portfolio.userId != :userId', { userId: filters.userId });
     }
-
-    if (filters.ownProduct !== undefined) {
-      query.andWhere('portfolio.ownProduct = :ownProduct', {
-        ownProduct: filters.ownProduct,
-      });
-    }
-
-    if (filters.likesCount) {
-      query.andWhere('portfolio.likesCount >= :likesCount', {
-        likesCount: filters.likesCount,
-      });
-    }
-
-    if (filters.views) {
-      query.andWhere('portfolio.views >= :views', { views: filters.views });
-    }
-
-    // **Kategoriya bo‘yicha filter**
+    // Agar ownProduct = false bo'lsa, boshqa userlarning productlarini olish
     if (filters.category) {
-      query.andWhere('portfolio.category = :category', {
-        category: filters.category,
+      query.andWhere('portfolio.category ILIKE :category', {
+        category: `%${filters.category}%`,
       });
+
+      console.log('Kategoriyaga qarab filtr ishladi:', filters.category);
     }
 
-    // **Sortlash: trending, newest, most_liked, most_viewed**
+    // Sort qilish
     if (filters.sortBy) {
       switch (filters.sortBy) {
         case 'trending':
-          query.orderBy('portfolio.views', 'DESC'); // Eng ko‘p ko‘rilganlar
+          query.orderBy('portfolio.views', 'DESC');
           break;
         case 'newest':
-          query.orderBy('portfolio.createdAt', 'DESC'); // Eng yangi
+          query.orderBy('portfolio.createdAt', 'DESC');
           break;
         case 'most_liked':
-          query.orderBy('portfolio.likesCount', 'DESC'); // Eng ko‘p yoqqanlar
+          query.orderBy('portfolio.likesCount', 'DESC');
           break;
         case 'most_viewed':
-          query.orderBy('portfolio.views', 'DESC'); // Eng ko‘p ko‘rilganlar
+          query.orderBy('portfolio.views', 'DESC');
+          break;
+        case 'category':
+          query.orderBy('portfolio.category', 'ASC'); // Kategoriya nomi bo'yicha saralash
           break;
         default:
           break;

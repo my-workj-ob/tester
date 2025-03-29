@@ -16,7 +16,7 @@ export class Project {
   @Column({ type: 'varchar', nullable: true })
   category?: string;
 
-  @Column({ type: 'text' })
+  @Column({ type: 'text', nullable: true })
   @ApiProperty({
     example:
       'A fully responsive e-commerce platform built with Next.js and Tailwind CSS',
@@ -24,21 +24,21 @@ export class Project {
   })
   description: string;
 
-  @Column('simple-array')
+  @Column('simple-array', { nullable: true })
   @ApiProperty({
     example: ['Next.js', 'React', 'Tailwind CSS'],
     description: 'Loyihaga tegishli texnologiyalar',
   })
   tags: string[];
 
-  @Column()
+  @Column({ nullable: true })
   @ApiProperty({
     example: 'https://example.com/image.jpg',
     description: 'Loyiha rasmi uchun URL',
   })
   imageUrl: string;
 
-  @ManyToOne(() => User, (user) => user.projects)
+  @ManyToOne(() => User, (user) => user.projects, { onDelete: 'CASCADE' })
   user: User;
 
   @ManyToOne(() => Profile, (profile) => profile.projects, {
@@ -60,4 +60,16 @@ export class Project {
 
   @Column({ default: 0 })
   commentsCount: number;
+
+  @Column('jsonb', { nullable: true })
+  images: { url: string; isMain: boolean }[];
+
+  @Column({ nullable: true })
+  githubUrl: string;
+
+  @Column({ nullable: true })
+  liveDemoUrl: string;
+
+  @Column({ default: true })
+  ownProject: boolean;
 }
