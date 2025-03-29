@@ -12,4 +12,9 @@ export class CreateSkillDto {
 
   @ApiProperty({ description: 'Whether the skill is public', example: true })
   isPublic: boolean;
+  @ApiProperty({
+    description: 'Whether the skill is isVerified',
+    example: true,
+  })
+  isVerified: boolean;
 }

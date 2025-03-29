@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -7,10 +8,8 @@ import {
   Param,
   Patch,
   Post,
-  Put,
   Req,
   Request,
-  UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -22,6 +21,8 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { SkillDto } from './dto/skill.dto';
@@ -44,13 +45,15 @@ export class ProfileController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Put()
+  @Patch()
   @ApiOperation({ summary: 'Profilni yangilash' })
   @ApiBody({ type: UpdateProfileDto })
   updateProfile(@Req() req, @Body() dto: UpdateProfileDto) {
-    return this.profileService.updateProfile(req.user.id, dto);
+    if (!req.user || !req.user.userId) {
+      throw new Error('User ID not found in request');
+    }
+    return this.profileService.updateProfile(req.user.userId, dto);
   }
-
   @UseGuards(JwtAuthGuard)
   @Patch('password')
   @ApiOperation({ summary: 'Parolni o‘zgartirish' })
@@ -92,11 +95,32 @@ export class ProfileController {
     return this.profileService.updatePrivacy(req.user.id, dto);
   }
   @UseGuards(JwtAuthGuard)
-  @Post('avatar')
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Profil rasmini yuklash' })
-  uploadAvatar(@Req() req, @UploadedFile() file: Express.Multer.File) {
-    const avatarUrl = `uploads/${file.filename}`;
-    return this.profileService.uploadAvatar(req.user.id, avatarUrl);
+  @Patch('avatar/:profileId')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, cb) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(
+            null,
+            file.fieldname + '-' + uniqueSuffix + extname(file.originalname),
+          );
+        },
+      }),
+    }),
+  )
+  async updateAvatar(
+    @Param('profileId') profileId: number,
+    @Body('avatar') avatarUrl: string,
+  ) {
+    if (!avatarUrl) {
+      throw new BadRequestException('Avatar URL is required');
+    }
+
+    return this.profileService.updateAvatar(profileId, avatarUrl);
   }
 }

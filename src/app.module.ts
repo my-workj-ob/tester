@@ -24,6 +24,8 @@ import { SkillModule } from './skill/skill.module';
 import { SkillService } from './skill/skill.service';
 import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
+import { FileController } from './file/file.controller';
+import { FileModule } from './file/file.module';
 
 @Module({
   imports: [
@@ -43,16 +45,17 @@ import { UserModule } from './user/user.module';
     ProfileModule,
     PortfolioModule,
     MentorsModule,
-    MentorsModule,
     SecurityModule,
     SkillModule,
     CategoryModule,
+    FileModule,
   ],
   controllers: [
     AppController,
     ProjectController,
     TwoFactorAuthController,
     SkillController,
+    FileController,
   ],
   providers: [AppService, SkillService, CategoryService],
 })

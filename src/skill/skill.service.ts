@@ -26,7 +26,7 @@ export class SkillService {
     console.log('isPublic:', isPublic);
     return await this.skillRepository.find({
       where: { profile: { id: profileId }, isPublic },
-      relations: ['profile'],
+      relations: ['profile', 'category'],
     });
   }
 
@@ -36,7 +36,7 @@ export class SkillService {
     profileId: number,
     createSkillDto: CreateSkillDto,
   ): Promise<Skill> {
-    const { name, categoryId } = createSkillDto;
+    const { name, categoryId, isPublic, isVerified } = createSkillDto;
 
     // ✅ `categoryId` bo‘yicha categoryni bazadan topamiz
     const category = await this.categoryRepo.findOne({
@@ -51,7 +51,17 @@ export class SkillService {
     if (!profile) throw new NotFoundException('Profile not found');
 
     // ✅ Yangi skill yaratamiz va saqlaymiz
-    const skill = this.skillRepo.create({ name, category, profile });
+    if (!name || !categoryId || isPublic === undefined) {
+      throw new Error('Missing required properties');
+    }
+
+    const skill = this.skillRepo.create({
+      name,
+      category,
+      profile,
+      isPublic,
+      isVerified,
+    });
     return this.skillRepo.save(skill);
   }
 

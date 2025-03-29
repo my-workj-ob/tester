@@ -18,6 +18,9 @@ export class Profile {
   @Column({ nullable: false })
   firstName: string;
 
+  @Column({ nullable: true })
+  name: string;
+
   @Column({ nullable: false })
   lastName: string;
 

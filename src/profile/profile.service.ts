@@ -76,7 +76,18 @@ export class ProfileService {
   }
 
   async updateProfile(userId: number, dto: UpdateProfileDto): Promise<Profile> {
-    await this.profileRepository.update(userId, dto);
+    console.log(userId);
+
+    if (!userId) {
+      throw new Error('User ID is required');
+    }
+
+    const result = await this.profileRepository.update(userId, dto);
+
+    if (result.affected === 0) {
+      throw new Error('Profile not found or update failed');
+    }
+
     return this.getProfile(userId);
   }
 
@@ -100,7 +111,20 @@ export class ProfileService {
   }
 
   async uploadAvatar(userId: number, avatarUrl: string): Promise<Profile> {
-    await this.profileRepository.update(userId, { avatar: avatarUrl });
-    return this.getProfile(userId);
+    const profile = await this.profileRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!profile) {
+      throw new Error('Profile not found');
+    }
+
+    profile.avatar = avatarUrl;
+    return await this.profileRepository.save(profile); // Saqlash
+  }
+
+  async updateAvatar(profileId: number, avatarUrl: string): Promise<Profile> {
+    await this.profileRepository.update(profileId, { avatar: avatarUrl });
+    return this.getProfile(profileId);
   }
 }
