@@ -10,7 +10,18 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
   app.enableCors({
-    origin: ['https://it-experts-one.vercel.app', 'http://localhost:3030'], // Ruxsat berilgan frontend domeni
+    origin: (origin, callback) => {
+      if (
+        !origin ||
+        ['https://it-experts-one.vercel.app', 'http://localhost:3000'].includes(
+          origin,
+        )
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
