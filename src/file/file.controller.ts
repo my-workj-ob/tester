@@ -1,10 +1,12 @@
 import {
   Controller,
   Post,
+  Req,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Request } from 'express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { FileService } from './file.service';
@@ -29,13 +31,17 @@ export class FileController {
       }),
     }),
   )
-  async uploadFile(@UploadedFile() file: Express.Multer.File) {
+  async uploadFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: Request,
+  ) {
     if (!file) {
       throw new Error('File is missing');
     }
 
-    // Faylni databasega saqlash
-    const fileUrl = `http://localhost:3030/uploads/${file.filename}`;
+    const host = `${req.protocol}://${req.get('host')}`;
+    const fileUrl = `${host}/uploads/${file.filename}`;
+
     const savedFile = await this.fileService.saveFile(fileUrl);
 
     return { fileId: savedFile.id, fileUrl: savedFile.url };
