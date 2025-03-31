@@ -5,6 +5,11 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
+interface User {
+  id: number;
+  email: string;
+  sub?: number; // sub qo‘shildi
+}
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
@@ -15,8 +20,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  validate(payload: any) {
-    console.log(payload);
-    return { userId: payload.id, email: payload.email };
+  validate(payload: User) {
+    console.log('payload validate: ', payload);
+    return { userId: payload.sub, email: payload.email };
   }
 }

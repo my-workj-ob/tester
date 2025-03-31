@@ -8,7 +8,11 @@ import { RefreshToken } from './auth/entities/refresh-token.entity';
 import { CategoryModule } from './category/category.module';
 import { CategoryService } from './category/category.service';
 import { Category } from './category/entities/category.entity';
+import { CommentController } from './comments/comments.controller';
+import { CommentsModule } from './comments/comments.module';
 import configuration from './config/configuration';
+import { FileController } from './file/file.controller';
+import { FileModule } from './file/file.module';
 import { Mentor } from './mentors/entities/mentor.entity';
 import { MentorsModule } from './mentors/mentors.module';
 import { Project } from './portfolio/entities/project.entity';
@@ -24,8 +28,6 @@ import { SkillModule } from './skill/skill.module';
 import { SkillService } from './skill/skill.service';
 import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
-import { FileController } from './file/file.controller';
-import { FileModule } from './file/file.module';
 
 @Module({
   imports: [
@@ -49,6 +51,7 @@ import { FileModule } from './file/file.module';
     SkillModule,
     CategoryModule,
     FileModule,
+    CommentsModule,
   ],
   controllers: [
     AppController,
@@ -56,6 +59,7 @@ import { FileModule } from './file/file.module';
     TwoFactorAuthController,
     SkillController,
     FileController,
+    CommentController,
   ],
   providers: [AppService, SkillService, CategoryService],
 })

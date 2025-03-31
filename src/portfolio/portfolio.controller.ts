@@ -7,9 +7,11 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   Post,
   Put,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -95,5 +97,28 @@ export class ProjectController {
   @ApiResponse({ status: 404, description: 'Loyiha topilmadi.' })
   delete(@Param('id') id: number) {
     return this.projectService.delete(id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/like')
+  async toggleLike(@Param('id') id: number, @Req() req) {
+    const userId = req.user.userId;
+    const isLiked = await this.projectService.toggleLike(Number(id), userId);
+
+    const project = await this.projectService.findOne(Number(id));
+    if (!project) {
+      throw new NotFoundException('Project not found'); // ✅ Xatolikni oldini olish
+    }
+
+    return { liked: isLiked, likesCount: project.likesCount };
+  }
+
+  @Get(':id/like/status')
+  async getLikeStatus(
+    @Param('id') projectId: number,
+    @Query('userId') userId: number,
+  ) {
+    const liked = await this.projectService.checkLikeStatus(projectId, userId);
+    return { liked };
   }
 }

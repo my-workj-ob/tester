@@ -29,7 +29,7 @@ export class AuthService {
     private readonly refreshTokenService: RefreshTokenService,
   ) {}
   async generateAccessTokens(user: User): Promise<string> {
-    return this.jwtService.sign({ id: user.id }, { expiresIn: '15m' });
+    return this.jwtService.sign({ ...user, id: user.id }, { expiresIn: '15m' });
   }
 
   async register(dto: RegisterDto) {
@@ -72,8 +72,10 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload = { id: user.id, email: user.email };
+    const payload = { sub: user.id, email: user.email };
     const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' }); // 15 daqiqa
+    console.log('user payload: ', payload);
+
     const refreshToken = this.jwtService.sign(payload, {
       secret: 'baxtiyor08072006',
       expiresIn: '7d',

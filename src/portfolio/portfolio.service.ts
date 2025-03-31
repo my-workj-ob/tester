@@ -116,14 +116,48 @@ export class ProjectService {
     );
   }
 
-  async likePortfolio(portfolioId: string, userId: string) {
-    const portfolio = await this.projectRepository.findOne({
-      where: { id: Number(portfolioId) },
+  async toggleLike(projectId: number, userId: number): Promise<boolean> {
+    const project = await this.projectRepository.findOne({
+      where: { id: projectId },
+      relations: ['likes'],
     });
-    if (!portfolio) throw new NotFoundException('Portfolio not found');
 
-    portfolio.likesCount += 1;
-    return this.projectRepository.save(portfolio);
+    if (!project) {
+      throw new NotFoundException('Project not found');
+    }
+
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // User oldin like bosganmi?
+    const hasLiked = project.likes.some((likeUser) => likeUser.id === userId);
+
+    if (hasLiked) {
+      project.likes = project.likes.filter(
+        (likeUser) => likeUser.id !== userId,
+      );
+      project.likesCount -= 1; // ✅ Like olib tashlanganda kamaytirish
+    } else {
+      project.likes.push(user);
+      project.likesCount += 1; // ✅ Like qo‘shilganda oshirish
+    }
+
+    await this.projectRepository.save(project);
+    return !hasLiked; // True → Liked, False → Unliked
+  }
+
+  async checkLikeStatus(projectId: number, userId: number): Promise<boolean> {
+    const project = await this.projectRepository.findOne({
+      where: { id: projectId },
+      relations: ['likes'],
+    });
+
+    if (!project) throw new NotFoundException('Project not found');
+
+    return project.likes.some((user) => user.id === userId);
   }
 
   async addComment(portfolioId: string, commentText: string, userId: string) {

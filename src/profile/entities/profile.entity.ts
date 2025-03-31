@@ -1,3 +1,4 @@
+import { Comment } from 'src/comments/entities/comments.entity';
 import { Project } from 'src/portfolio/entities/project.entity';
 import { Skill } from 'src/skill/entities/skill.entity';
 import { User } from 'src/user/entities/user.entity';
@@ -44,4 +45,7 @@ export class Profile {
   @OneToOne(() => User, (user) => user.profile, { onDelete: 'CASCADE' })
   @JoinColumn()
   user: User;
+
+  @OneToMany(() => Comment, (comment) => comment.profile, { cascade: true })
+  comments: Comment[];
 }

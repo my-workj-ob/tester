@@ -1,7 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Profile } from 'src/profile/entities/profile.entity';
 import { User } from 'src/user/entities/user.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class Project {
@@ -72,4 +79,8 @@ export class Project {
 
   @Column({ default: true })
   ownProject: boolean;
+
+  @ManyToMany(() => User, (user) => user.likedProjects)
+  @JoinTable()
+  likes: User[];
 }
