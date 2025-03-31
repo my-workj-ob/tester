@@ -33,32 +33,46 @@ export class AuthService {
   }
 
   async register(dto: RegisterDto) {
-    // Check if the email is already taken
+    // Email bandligini tekshirish
     const existingUser = await this.userService.findByEmail(dto.email);
     if (existingUser) throw new BadRequestException('Email already taken');
 
-    // Hash the password
+    // Parolni xeshlash
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
-    // Create the user
+    // Foydalanuvchini yaratish
     const user = await this.userService.create({
       ...dto,
       password: hashedPassword,
     });
 
-    // ✅ Email maydonini qo‘shish kerak
+    // Profil yaratish
     const profile = this.profileRepository.create({
-      user: user,
+      user,
       firstName: dto.firstName || '',
       lastName: dto.lastName || '',
-      email: dto.email, // ✅ **Email maydonini qo‘shdik**
+      email: dto.email,
       jobTitle: dto.jobTitle || '',
       avatar: '',
     });
-
     await this.profileRepository.save(profile);
 
-    return user;
+    // **Avtomatik login qilish (JWT tokenlar yaratish)**
+    const payload = { sub: user.id, email: user.email };
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: 'baxtiyor08072006',
+      expiresIn: '7d',
+    });
+
+    // **Refresh tokenni saqlash**
+    await this.refreshTokenService.saveRefreshToken(user.id, refreshToken);
+
+    return {
+      user,
+      accessToken,
+      refreshToken,
+    };
   }
 
   async login(
