@@ -59,7 +59,7 @@ export class AuthService {
 
     // **Avtomatik login qilish (JWT tokenlar yaratish)**
     const payload = { sub: user.id, email: user.email };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '30m' });
     const refreshToken = this.jwtService.sign(payload, {
       secret: 'baxtiyor08072006',
       expiresIn: '7d',

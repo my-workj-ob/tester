@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   Body,
   Controller,
@@ -25,11 +27,15 @@ export class CommentController {
   constructor(private commentService: CommentService) {}
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   getComments(
     @Query('entityId') entityId: number,
     @Query('entityType') entityType: string,
+    @Req() req: any,
   ) {
-    return this.commentService.getComments(entityId, entityType);
+    const user = req.user.userId;
+
+    return this.commentService.getComments(entityId, entityType, user);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -64,7 +70,8 @@ export class CommentController {
   @UseGuards(JwtAuthGuard)
   @Post(':id/like')
   //
-  likeComment(@Param('id') id: number) {
-    return this.commentService.likeComment(id);
+  likeComment(@Param('id') id: number, @Req() req: RequestWithUser) {
+    const userId = req.user.id;
+    return this.commentService.likeComment(id, userId);
   }
 }

@@ -1,3 +1,4 @@
+import { Like } from 'src/like/entities/like.entity';
 import { Profile } from 'src/profile/entities/profile.entity';
 import { User } from 'src/user/entities/user.entity';
 import {
@@ -27,12 +28,12 @@ export class Comment {
     eager: true,
   })
   user: User;
+
   @ManyToOne(() => Profile, (profile) => profile.comments, {
     eager: true,
     onDelete: 'CASCADE',
   })
   profile: Profile;
-
   @ManyToOne(() => Comment, (comment) => comment.replies, {
     nullable: true,
   })
@@ -43,6 +44,12 @@ export class Comment {
 
   @CreateDateColumn()
   createdAt: string;
-  @Column({ default: 0 })
-  likes: number;
+
+  @Column({ default: 0 }) // 🔹 Like sonini saqlash uchun
+  likesCount: number;
+
+  @OneToMany(() => Like, (like) => like.comment, { cascade: true }) // ✅ Like bilan bog'lash
+  likes: Like[]; // ✅
+
+  likedByCurrentUser?: boolean;
 }

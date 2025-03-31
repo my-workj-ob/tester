@@ -28,6 +28,8 @@ import { SkillModule } from './skill/skill.module';
 import { SkillService } from './skill/skill.service';
 import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
+import { LikeController } from './like/like.controller';
+import { LikeModule } from './like/like.module';
 
 @Module({
   imports: [
@@ -52,6 +54,7 @@ import { UserModule } from './user/user.module';
     CategoryModule,
     FileModule,
     CommentsModule,
+    LikeModule,
   ],
   controllers: [
     AppController,
@@ -60,6 +63,7 @@ import { UserModule } from './user/user.module';
     SkillController,
     FileController,
     CommentController,
+    LikeController,
   ],
   providers: [AppService, SkillService, CategoryService],
 })

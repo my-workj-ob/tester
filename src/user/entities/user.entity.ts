@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 
 import { Comment } from 'src/comments/entities/comments.entity';
+import { Like } from 'src/like/entities/like.entity';
 import { Session } from '../../security/entities/session.entity';
 
 @Entity()
@@ -47,4 +48,7 @@ export class User {
   comments: Comment[];
   @ManyToMany(() => Project, (project) => project.likes)
   likedProjects: Project[];
+
+  @OneToMany(() => Like, (like) => like.user, { cascade: true })
+  likes: Like[];
 }

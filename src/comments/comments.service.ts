@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Like } from 'src/like/entities/like.entity';
 import { User } from 'src/user/entities/user.entity';
 import { IsNull, Repository } from 'typeorm';
 import { Comment } from './entities/comments.entity';
@@ -11,6 +12,8 @@ export class CommentService {
   constructor(
     @InjectRepository(Comment)
     private commentRepository: Repository<Comment>,
+    @InjectRepository(Like)
+    private likeRepository: Repository<Like>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
   ) {}
@@ -18,25 +21,42 @@ export class CommentService {
   async getComments(
     entityId: number,
     entityType: string,
+    userId: number, // Foydalanuvchi ID si
     page = 1,
     limit = 10,
   ) {
+    console.log('userId', userId);
+
     const [comments, count] = await this.commentRepository.findAndCount({
-      where: { entityId, entityType, parentComment: IsNull() }, // ✅ TO'G'RI
+      where: { entityId, entityType, parentComment: IsNull() },
       relations: [
         'user',
         'user.profile',
         'replies',
         'replies.user',
         'replies.user.profile',
+        'replies.likes', // ✅ Replies uchun like-larni qo‘shamiz
+        'replies.likes.user', // ✅ Replies uchun like bosgan userlar ham kerak
+        'likes',
+        'likes.user',
       ],
       order: { createdAt: 'DESC' },
       take: limit,
       skip: (page - 1) * limit,
     });
 
+    // Har bir komment va reply-ga `likedByCurrentUser` qo‘shamiz
+    const commentsWithLikeStatus = comments.map((comment) => ({
+      ...comment,
+      likedByCurrentUser: comment.likes.some((like) => like.user.id === userId),
+      replies: comment.replies.map((reply) => ({
+        ...reply,
+        likedByCurrentUser: reply.likes.some((like) => like.user.id === userId), // ✅ Replies uchun like bor yoki yo‘qligini tekshiramiz
+      })),
+    }));
+
     return {
-      comments,
+      comments: commentsWithLikeStatus,
       total: count,
       hasNextPage: count > page * limit,
     };
@@ -76,7 +96,7 @@ export class CommentService {
       entityId,
       entityType,
       content,
-      likes: 0,
+      likesCount: 0,
       parentComment: parentComment || undefined,
     });
 
@@ -94,13 +114,43 @@ export class CommentService {
     return this.commentRepository.remove(comment);
   }
 
-  async likeComment(commentId: number) {
+  async likeComment(commentId: number, userId: number) {
+    // 1. Kommentni olish
     const comment = await this.commentRepository.findOne({
       where: { id: commentId },
     });
     if (!comment) throw new NotFoundException('Comment not found');
 
-    comment.likes += 1;
-    return this.commentRepository.save(comment);
+    // 2. Foydalanuvchi oldin like bosganmi?
+    const existingLike = await this.likeRepository.findOne({
+      where: { comment: { id: commentId }, user: { id: userId } },
+    });
+
+    if (existingLike) {
+      // Agar oldin like bosgan bo‘lsa, uni o‘chiramiz (Unlike)
+      await this.likeRepository.remove(existingLike);
+      comment.likesCount = Math.max(0, comment.likesCount - 1); // 0 dan kam bo‘lmasin
+    } else {
+      // Yangi like yaratish
+      const newLike = this.likeRepository.create({
+        user: { id: userId },
+        comment,
+      });
+      await this.likeRepository.save(newLike);
+      comment.likesCount += 1;
+    }
+
+    // likesCount noto‘g‘ri bo‘lsa xato chiqarish
+    if (comment.likesCount === undefined || comment.likesCount === null) {
+      throw new Error('likesCount is undefined or null');
+    }
+
+    // `update` o‘rniga `save` ishlatildi
+    await this.commentRepository.save(comment);
+
+    return {
+      message: existingLike ? 'Like removed' : 'Liked',
+      likes: comment.likesCount,
+    };
   }
 }
