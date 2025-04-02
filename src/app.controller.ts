@@ -1,12 +1,15 @@
 import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
-
   @Get()
   getHello(): string {
-    return this.appService.getHello();
+    try {
+      // Код, который может вызвать ошибку
+      return 'Hello World!';
+    } catch (error) {
+      console.error('Ошибка в getHello:', error); // Логирование ошибки
+      throw error; // Переброс ошибки для обработки NestJS
+    }
   }
 }
