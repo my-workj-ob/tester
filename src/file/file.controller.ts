@@ -39,8 +39,8 @@ export class FileController {
       throw new Error('File is missing');
     }
 
-    const host = `${req.protocol}://${req.get('host')}`;
-    const fileUrl = `${host}/uploads/${file.filename}`;
+    // const host = `${req.protocol}://${req.get('host')}`;
+    const fileUrl = `${'https://tester-nu-two.vercel.app'}/uploads/${file.filename}`;
 
     const savedFile = await this.fileService.saveFile(fileUrl);
 
