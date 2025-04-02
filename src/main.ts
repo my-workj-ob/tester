@@ -10,10 +10,7 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
-  app.use(
-    '/api/docs',
-    express.static(join(__dirname, '..', 'node_modules', 'swagger-ui-dist')),
-  );
+
   app.enableCors({
     origin: (origin, callback) => {
       if (
@@ -31,7 +28,7 @@ async function bootstrap() {
     },
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true, // 🔥 BU MUHIM!
+    credentials: true,
   });
 
   const config = new DocumentBuilder()
@@ -41,19 +38,12 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document, {
-    customSiteTitle: 'Backend Generator',
-    customfavIcon: 'https://avatars.githubusercontent.com/u/6936373?s=200&v=4',
-    customJs: [
-      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.min.js',
-      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.min.js',
-    ],
-    customCssUrl: [
-      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css',
-      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.min.css',
-      'https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.css',
-    ],
-  });
+  SwaggerModule.setup('api/docs', app, document);
+  app.use(
+    '/api/docs',
+    express.static(join(__dirname, '../node_modules/swagger-ui-dist')),
+  );
+
   await app.listen(process.env.PORT || 3000);
 }
 bootstrap();
