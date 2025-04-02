@@ -26,15 +26,15 @@
     },
     {
       "src": "/api-docs/swagger-ui-init.js",
-      "dest": "app.js"
+      "dest": "src/main.ts"
     },
     {
       "src": "/api-docs.json",
-      "dest": "app.js"
+      "dest": "src/main.ts"
     },
     {
       "src": "/(.*)",
-      "dest": "app.js"
+      "dest": "src/main.ts"
     }
   ],
   "buildCommand": "npm run build"
