@@ -11,19 +11,23 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
 
-  const allowedOrigins = [
-    'https://it-experts-nine.vercel.app',
-    'http://localhost:3000',
-    'http://localhost:3030',
-  ];
   app.enableCors({
     origin: (origin, callback) => {
-      if (allowedOrigins.includes(origin) || !origin) {
+      if (
+        !origin ||
+        [
+          'https://it-experts-nine.vercel.app',
+          'http://localhost:3000',
+          'http://localhost:3030',
+        ].includes(origin)
+      ) {
         callback(null, true);
       } else {
         callback(new Error('Not allowed by CORS'));
       }
     },
+    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   });
   // fix cors
