@@ -1,20 +1,14 @@
 {
   "compilerOptions": {
-    "module": "CommonJS",
+    "module": "commonjs",
     "declaration": true,
     "removeComments": true,
-    "esModuleInterop": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "target": "ESNext",
+    "target": "ES2023",
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "src",
-    "moduleResolution": "node",
-    "paths": {
-      "*": ["src/*"]
-    },
     "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
@@ -23,6 +17,5 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false
-  },
-  "include": ["src/**/*"]
+  }
 }
