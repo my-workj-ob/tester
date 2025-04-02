@@ -14,7 +14,7 @@ async function bootstrap() {
   app.enableCors({
     origin: (origin, callback) => {
       if (!origin) {
-        callback(null, true); // Bu yerda origin bo'lmasa, ruxsat berish
+        callback(null, 'https://it-experts-nine.vercel.app'); // Origin bo'lmasa ham, ruxsat berish uchun originni qaytarish
         return;
       }
       const allowedOrigins = [
@@ -23,7 +23,7 @@ async function bootstrap() {
       ];
 
       if (allowedOrigins.includes(origin)) {
-        callback(null, true); // Agar ruxsat berilgan origin bo'lsa
+        callback(null, origin); // Agar ruxsat berilgan origin bo'lsa, o'sha originni qaytarish
       } else {
         callback(new Error('Not allowed by CORS')); // Agar ruxsat berilmasa
       }
