@@ -79,8 +79,6 @@ export class AuthController {
   })
   @Post('refresh-token')
   async refreshToken(@Body('refreshToken') token: string, @Res() res) {
-    console.log('Tekshirilayotgan refresh tokens:', token); // Tokenni tekshirish
-
     const user = await this.refreshTokenService.validateRefreshToken(token);
     console.log(user);
 

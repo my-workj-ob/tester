@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as jwt from 'jsonwebtoken';
 import { Repository } from 'typeorm';
 import { User } from './../user/entities/user.entity';
 import { UserService } from './../user/user.service';
 import { RefreshToken } from './entities/refresh-token.entity';
-
 @Injectable()
 export class RefreshTokenService {
   constructor(
@@ -68,6 +68,7 @@ export class RefreshTokenService {
       if (!decoded || !decoded.id) {
         throw new Error('Invalid token');
       }
+
       // Tokenni bazadan tekshirish
       const refreshTokenEntity = await this.refreshTokenRepository.findOne({
         where: { token },
@@ -80,7 +81,15 @@ export class RefreshTokenService {
 
       return refreshTokenEntity.user;
     } catch (e) {
-      throw new Error('Refresh token validation error: ' + e.message);
+      // Agar token muddati tugagan bo'lsa, aniq xato xabari
+      if (e instanceof jwt.TokenExpiredError) {
+        throw new UnauthorizedException('Refresh token has expired');
+      }
+
+      // Boshqa xatolarni umumiy xato bilan qaytarish
+      throw new UnauthorizedException(
+        'Refresh token validation error: ' + e.message,
+      );
     }
   }
 
