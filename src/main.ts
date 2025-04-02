@@ -10,6 +10,10 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
+  app.use(
+    '/api/docs',
+    express.static(join(__dirname, '..', 'node_modules', 'swagger-ui-dist')),
+  );
   app.enableCors({
     origin: (origin, callback) => {
       if (
