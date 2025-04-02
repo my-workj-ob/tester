@@ -30,7 +30,7 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   });
-
+  // fix cors
   const config = new DocumentBuilder()
     .setTitle('Auth API')
     .setDescription('NestJS Authentication API')
