@@ -22,7 +22,7 @@ export class FileController {
     FileInterceptor('file', {
       storage: diskStorage({
         destination: (req, file, cb) => {
-          cb(null, uploadPath); // Endi /tmp ishlatamiz
+          cb(null, uploadPath);
         },
         filename: (req, file, cb) => {
           const uniqueSuffix =
