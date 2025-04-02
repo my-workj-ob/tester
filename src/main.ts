@@ -16,7 +16,7 @@ async function bootstrap() {
       if (
         !origin ||
         [
-          'https://it-experts-one.vercel.app',
+          'https://it-experts-nine.vercel.app',
           'http://localhost:3000',
           'http://localhost:3030',
         ].includes(origin)
