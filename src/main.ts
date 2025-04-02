@@ -12,25 +12,12 @@ async function bootstrap() {
   app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
 
   app.enableCors({
-    origin: (origin, callback) => {
-      if (
-        !origin ||
-        [
-          'https://it-experts-nine.vercel.app',
-          'http://localhost:3000',
-          'http://localhost:3030',
-        ].includes(origin)
-      ) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+    origin: ['https://it-experts-nine.vercel.app', 'http://localhost:3000'],
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
+    optionsSuccessStatus: 204, // Preflight muammosini hal qiladi
   });
-  // fix cors
   const config = new DocumentBuilder()
     .setTitle('Auth API')
     .setDescription('NestJS Authentication API')
