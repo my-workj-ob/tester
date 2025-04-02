@@ -11,27 +11,20 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
 
+  const allowedOrigins = [
+    'https://it-experts-nine.vercel.app',
+    'http://localhost:3000',
+    'http://localhost:3030',
+  ];
   app.enableCors({
     origin: (origin, callback) => {
-      if (!origin) {
-        callback(null, 'https://it-experts-nine.vercel.app'); // Origin bo'lmasa ham, ruxsat berish uchun originni qaytarish
-        return;
-      }
-      const allowedOrigins = [
-        'https://it-experts-nine.vercel.app',
-        'http://localhost:3000',
-      ];
-
-      if (allowedOrigins.includes(origin)) {
-        callback(null, origin); // Agar ruxsat berilgan origin bo'lsa, o'sha originni qaytarish
+      if (allowedOrigins.includes(origin) || !origin) {
+        callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS')); // Agar ruxsat berilmasa
+        callback(new Error('Not allowed by CORS'));
       }
     },
-    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
-    optionsSuccessStatus: 204, // Preflight uchun to'g'ri status kodi
   });
   // fix cors
   const config = new DocumentBuilder()
