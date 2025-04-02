@@ -11,18 +11,15 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { FileService } from './file.service';
 
-const uploadPath = '/tmp/uploads'; // Yangi yo'l
-
 @Controller('file')
 export class FileController {
   constructor(private readonly fileService: FileService) {}
+
   @Post('upload')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        destination: (req, file, cb) => {
-          cb(null, uploadPath);
-        },
+        destination: './uploads',
         filename: (req, file, cb) => {
           const uniqueSuffix =
             Date.now() + '-' + Math.round(Math.random() * 1e9);
