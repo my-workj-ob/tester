@@ -30,7 +30,6 @@ import { SkillModule } from './skill/skill.module';
 import { SkillService } from './skill/skill.service';
 import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
-import { TestModule } from './test/test.module';
 
 @Module({
   imports: [
@@ -56,7 +55,6 @@ import { TestModule } from './test/test.module';
     FileModule,
     CommentsModule,
     LikeModule,
-    TestModule,
   ],
   controllers: [
     AppController,
