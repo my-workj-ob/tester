@@ -16,16 +16,7 @@ async function bootstrap() {
     'http://localhost:3000',
     'http://localhost:3030',
   ];
-  app.enableCors({
-    origin: (origin, callback) => {
-      if (allowedOrigins.includes(origin) || !origin) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    credentials: true,
-  });
+  app.enableCors();
   // fix cors
   const config = new DocumentBuilder()
     .setTitle('Auth API')
