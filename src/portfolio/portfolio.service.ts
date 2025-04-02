@@ -21,12 +21,9 @@ export class ProjectService {
   ) {}
 
   async createPortfolio(data: CreatePortfolioDto, userId: string) {
-    console.log('user: ', userId);
-
     const user = await this.userRepository.findOne({
       where: { id: Number(userId) },
     });
-    console.log(user);
 
     if (!user) throw new NotFoundException('User not found');
 
@@ -34,8 +31,6 @@ export class ProjectService {
       where: { user: { id: Number(userId) } },
       relations: ['user'], // 🛠 YANGI QO‘SHILGAN QATOR
     });
-
-    console.log(profile);
 
     if (!profile) throw new NotFoundException('Profile not found');
 
@@ -78,8 +73,6 @@ export class ProjectService {
       query.andWhere('portfolio.category ILIKE :category', {
         category: `%${filters.category}%`,
       });
-
-      console.log('Kategoriyaga qarab filtr ishladi:', filters.category);
     }
 
     // Sort qilish
@@ -160,7 +153,7 @@ export class ProjectService {
     return project.likes.some((user) => user.id === userId);
   }
 
-  async addComment(portfolioId: string, commentText: string, userId: string) {
+  async addComment(portfolioId: string) {
     const portfolio = await this.projectRepository.findOne({
       where: { id: Number(portfolioId) },
     });

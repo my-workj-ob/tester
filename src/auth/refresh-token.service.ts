@@ -18,71 +18,77 @@ export class RefreshTokenService {
   ) {}
 
   async generateRefreshToken(user: User): Promise<string> {
-    const refreshToken = this.jwtService.sign(
-      { id: user.id },
-      { expiresIn: '7d' },
-    );
+    try {
+      const refreshToken = this.jwtService.sign(
+        { id: user.id },
+        { expiresIn: '7d' },
+      );
 
-    const newToken = this.refreshTokenRepository.create({
-      token: refreshToken,
-      user: user,
-    });
+      const newToken = this.refreshTokenRepository.create({
+        token: refreshToken,
+        user: user,
+      });
 
-    await this.refreshTokenRepository.save(newToken);
-    return refreshToken;
-  }
-  async saveRefreshToken(userId: number, token: string) {
-    console.log(`🔄 Bazaga saqlanayotgan refresh token: ${token}`);
-
-    // Retrieve the user entity from the database
-    const user = await this.userService.findById(userId);
-
-    if (!user) {
-      throw new Error('User not found');
+      await this.refreshTokenRepository.save(newToken);
+      return refreshToken;
+    } catch (error) {
+      throw new Error('Error generating refresh token: ' + error.message);
     }
+  }
 
-    // Create the refresh token entity and associate it with the user
-    const refreshTokenEntity = this.refreshTokenRepository.create({
-      token: token, // Tokenni saqlaymiz
-      user: { id: userId },
-    });
+  async saveRefreshToken(userId: number, token: string) {
+    try {
+      // Retrieve the user entity from the database
+      const user = await this.userService.findById(userId);
+      if (!user) {
+        throw new Error('User not found');
+      }
 
-    console.log(`💾 Bazaga saqlash uchun entity:`, refreshTokenEntity);
+      // Create the refresh token entity and associate it with the user
+      const refreshTokenEntity = this.refreshTokenRepository.create({
+        token: token,
+        user: { id: userId },
+      });
 
-    await this.refreshTokenRepository.save(refreshTokenEntity);
-    console.log(`✅ Refresh token bazaga saqlandi`);
+      await this.refreshTokenRepository.save(refreshTokenEntity);
+    } catch (error) {
+      throw new Error('Error saving refresh token: ' + error.message);
+    }
   }
 
   async validateRefreshToken(token: string) {
-    console.log('Tekshirilayotgan refresh token:', token);
-
     try {
       // Tokenni tekshirib ko‘rish
       const decoded = this.jwtService.verify(token, {
         secret: 'baxtiyor08072006', // secretni tekshirish
+        ignoreExpiration: false, // Bu parametrni qo'shish, token muddati tugagan bo'lsa xatolikni qaytaradi
       });
-      console.log('Decoded token:', decoded);
+
+      // Dekodlangan tokenni tekshirish
+      if (!decoded || !decoded.id) {
+        throw new Error('Invalid token');
+      }
+      // Tokenni bazadan tekshirish
+      const refreshTokenEntity = await this.refreshTokenRepository.findOne({
+        where: { token },
+        relations: ['user'],
+      });
+
+      if (!refreshTokenEntity) {
+        throw new Error('Refresh token not found in database');
+      }
+
+      return refreshTokenEntity.user;
     } catch (e) {
-      console.error('Refresh token tekshirishda xato:', e.message);
-      return null;
+      throw new Error('Refresh token validation error: ' + e.message);
     }
-
-    // Tokenni bazadan tekshirish
-    const refreshTokenEntity = await this.refreshTokenRepository.findOne({
-      where: { token },
-      relations: ['user'],
-    });
-
-    if (!refreshTokenEntity) {
-      console.error('⚠️ Refresh token bazada topilmadi!');
-      return null;
-    }
-
-    console.log('✅ Foydalanuvchi topildi:', refreshTokenEntity.user);
-    return refreshTokenEntity.user;
   }
 
   async deleteRefreshToken(token: string): Promise<void> {
-    await this.refreshTokenRepository.delete({ token });
+    try {
+      await this.refreshTokenRepository.delete({ token });
+    } catch (error) {
+      throw new Error('Error deleting refresh token: ' + error.message);
+    }
   }
 }

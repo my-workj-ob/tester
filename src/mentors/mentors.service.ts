@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './../user/entities/user.entity';
@@ -17,42 +21,64 @@ export class MentorService {
   ) {}
 
   async getAllMentors(): Promise<Mentor[]> {
-    return await this.mentorRepository.find({
-      relations: ['user', 'user.profile'],
-    });
+    try {
+      return await this.mentorRepository.find({
+        relations: ['user', 'user.profile'],
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error fetching mentors: ${error}`,
+      );
+    }
   }
 
-  async createMentor(dto: CreateMentorDto, userId): Promise<Mentor> {
-    const user = await this.userRepository.findOne({
-      where: { id: userId },
-    });
-    if (!user) {
-      throw new NotFoundException('User not found');
+  async createMentor(dto: CreateMentorDto, userId: number): Promise<Mentor> {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id: userId },
+      });
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      // ✅ `skills` ni PostgreSQL ARRAY formatida saqlash
+      const mentor = this.mentorRepository.create({
+        ...dto,
+        skills: dto.skills ? dto.skills.map((skill) => skill.trim()) : [],
+        user,
+      });
+
+      return await this.mentorRepository.save(mentor);
+    } catch (error) {
+      throw new InternalServerErrorException(`Error creating mentor: ${error}`);
     }
-
-    // ✅ `skills` ni PostgreSQL ARRAY formatida saqlash
-    const mentor = this.mentorRepository.create({
-      ...dto,
-      skills: dto.skills ? dto.skills.map((skill) => skill.trim()) : [],
-      user,
-    });
-
-    return await this.mentorRepository.save(mentor);
   }
 
   async findOne(id: number): Promise<Mentor | null> {
-    return this.mentorRepository.findOne({
-      where: { id },
-      relations: ['mentorshipRequests'],
-    });
-  }
-  async updateVisibility(id: number, isPrivate: boolean) {
-    const mentor = await this.mentorRepository.findOne({ where: { id } });
-    if (!mentor) {
-      return null;
+    try {
+      return this.mentorRepository.findOne({
+        where: { id },
+        relations: ['mentorshipRequests'],
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(`Error finding mentor: ${error}`);
     }
-    mentor.verified = !isPrivate; // Bu yerda `verified` ni ishlatamiz yoki alohida `isPrivate` column qo'shamiz
-    await this.mentorRepository.save(mentor);
-    return mentor;
+  }
+
+  async updateVisibility(id: number, isPrivate: boolean) {
+    try {
+      const mentor = await this.mentorRepository.findOne({ where: { id } });
+      if (!mentor) {
+        throw new NotFoundException('Mentor not found');
+      }
+
+      mentor.verified = !isPrivate; // Bu yerda `verified` ni ishlatamiz yoki alohida `isPrivate` column qo'shamiz
+      await this.mentorRepository.save(mentor);
+      return mentor;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error updating mentor visibility: ${error}`,
+      );
+    }
   }
 }

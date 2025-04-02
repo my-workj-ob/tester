@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateMentorshipRequestDto } from './dto/create-mentorship.dto';
@@ -11,34 +15,56 @@ export class MentorshipRequestService {
     @InjectRepository(MentorshipRequest)
     private mentorshipRequestRepository: Repository<MentorshipRequest>,
   ) {}
+
   async findMentorships(mentorId?: number) {
-    const whereCondition = mentorId ? { mentor: { id: mentorId } } : {};
-    return this.mentorshipRequestRepository.find({
-      where: whereCondition,
-      relations: ['mentor'],
-    });
-  }
-  async updateStatus(id: number, status: 'accepted' | 'rejected') {
-    const request = await this.mentorshipRequestRepository.findOne({
-      where: { id },
-    });
-    if (!request || request.status !== 'pending') {
-      return null;
+    try {
+      const whereCondition = mentorId ? { mentor: { id: mentorId } } : {};
+      return await this.mentorshipRequestRepository.find({
+        where: whereCondition,
+        relations: ['mentor'],
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error fetching mentorship requests: ${error}`,
+      );
     }
-    request.status = status;
-    await this.mentorshipRequestRepository.save(request);
-    return request;
+  }
+
+  async updateStatus(id: number, status: 'accepted' | 'rejected') {
+    try {
+      const request = await this.mentorshipRequestRepository.findOne({
+        where: { id },
+      });
+
+      if (!request || request.status !== 'pending') {
+        throw new NotFoundException('Request not found or already processed');
+      }
+
+      request.status = status;
+      await this.mentorshipRequestRepository.save(request);
+      return request;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error updating mentorship request status: ${error}`,
+      );
+    }
   }
 
   async createMentorshipRequest(
     mentor: Mentor,
     createRequestDto: CreateMentorshipRequestDto,
   ) {
-    const request = this.mentorshipRequestRepository.create({
-      mentor,
-      ...createRequestDto,
-      status: 'pending',
-    });
-    return this.mentorshipRequestRepository.save(request);
+    try {
+      const request = this.mentorshipRequestRepository.create({
+        mentor,
+        ...createRequestDto,
+        status: 'pending',
+      });
+      return await this.mentorshipRequestRepository.save(request);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error creating mentorship request: ${error}`,
+      );
+    }
   }
 }

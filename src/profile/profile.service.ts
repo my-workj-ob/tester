@@ -14,6 +14,7 @@ import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { UpdatePrivacyDto } from './dto/update-privacy.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { Profile } from './entities/profile.entity';
+
 @Injectable()
 export class ProfileService {
   constructor(
@@ -28,112 +29,143 @@ export class ProfileService {
   ) {}
 
   async updateNotifications(userId: number, dto: UpdateNotificationDto) {
-    const profile = await this.profileRepository.findOne({
-      where: { user: { id: userId } },
-    });
-    if (!profile) throw new BadRequestException('Foydalanuvchi topilmadi');
+    try {
+      const profile = await this.profileRepository.findOne({
+        where: { user: { id: userId } },
+      });
+      if (!profile) throw new BadRequestException('Foydalanuvchi topilmadi');
 
-    Object.assign(profile, dto);
-    await this.profileRepository.save(profile);
-    return { message: 'Bildirishnomalar sozlandi' };
+      Object.assign(profile, dto);
+      await this.profileRepository.save(profile);
+      return { message: 'Bildirishnomalar sozlandi' };
+    } catch (error) {
+      throw new Error(`Error updating notifications: ${error}`);
+    }
   }
 
   async updatePrivacy(userId: number, dto: UpdatePrivacyDto) {
-    const profile = await this.profileRepository.findOne({
-      where: { user: { id: userId } },
-    });
-    if (!profile) throw new BadRequestException('Foydalanuvchi topilmadi');
+    try {
+      const profile = await this.profileRepository.findOne({
+        where: { user: { id: userId } },
+      });
+      if (!profile) throw new BadRequestException('Foydalanuvchi topilmadi');
 
-    Object.assign(profile, dto);
-    await this.profileRepository.save(profile);
-    return { message: 'Maxfiylik sozlamalari yangilandi' };
+      Object.assign(profile, dto);
+      await this.profileRepository.save(profile);
+      return { message: 'Maxfiylik sozlamalari yangilandi' };
+    } catch (error) {
+      throw new Error(`Error updating privacy: ${error}`);
+    }
   }
+
   async changePassword(userId: number, dto: ChangePasswordDto) {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
+    try {
+      const user = await this.userRepository.findOne({ where: { id: userId } });
 
-    if (!user) {
-      throw new NotFoundException('Foydalanuvchi topilmadi');
+      if (!user) {
+        throw new NotFoundException('Foydalanuvchi topilmadi');
+      }
+
+      const isMatch = await bcrypt.compare(dto.currentPassword, user.password);
+      if (!isMatch) {
+        throw new BadRequestException('Joriy parol noto‘g‘ri');
+      }
+
+      user.password = await bcrypt.hash(dto.newPassword, 10);
+      await this.userRepository.save(user);
+
+      return { message: 'Parol muvaffaqiyatli yangilandi' };
+    } catch (error) {
+      throw new Error(`Error changing password: ${error}`);
     }
-
-    const isMatch = await bcrypt.compare(dto.currentPassword, user.password);
-    if (!isMatch) {
-      throw new BadRequestException('Joriy parol noto‘g‘ri');
-    }
-
-    user.password = await bcrypt.hash(dto.newPassword, 10);
-    await this.userRepository.save(user);
-
-    return { message: 'Parol muvaffaqiyatli yangilandi' };
   }
 
   async getProfile(userId: number): Promise<Profile> {
-    console.log('User ID:', userId);
+    try {
+      const profile = await this.profileRepository.findOne({
+        where: { id: userId },
+        relations: ['user'], // Profilga bog‘langan user ma’lumotlarini yuklash
+      });
 
-    // Profilni user bilan birga topamiz
-    const profile = await this.profileRepository.findOne({
-      where: { id: userId },
-      relations: ['user'], // Profilga bog‘langan user ma’lumotlarini yuklash
-    });
+      if (!profile) {
+        throw new NotFoundException('Profile not found');
+      }
 
-    console.log('Profile:', profile); // Profil logi
-
-    if (!profile) {
-      throw new NotFoundException('Profile not found');
+      return profile;
+    } catch (error) {
+      throw new Error(`Error getting profile: ${error}`);
     }
-
-    return profile;
   }
 
   async updateProfile(userId: number, dto: UpdateProfileDto): Promise<Profile> {
-    console.log(userId);
+    try {
+      if (!userId) {
+        throw new Error('User ID is required');
+      }
 
-    if (!userId) {
-      throw new Error('User ID is required');
+      const result = await this.profileRepository.update(userId, dto);
+
+      if (result.affected === 0) {
+        throw new Error('Profile not found or update failed');
+      }
+
+      return this.getProfile(userId);
+    } catch (error) {
+      throw new Error(`Error updating profile: ${error}`);
     }
-
-    const result = await this.profileRepository.update(userId, dto);
-
-    if (result.affected === 0) {
-      throw new Error('Profile not found or update failed');
-    }
-
-    return this.getProfile(userId);
   }
 
   async addSkill(userId: number, dto: SkillDto): Promise<Skill> {
-    const profile = await this.profileRepository.findOne({
-      where: { id: userId },
-    });
-    console.log('user', userId);
-    if (!profile) throw new NotFoundException('Profile not found');
+    try {
+      const profile = await this.profileRepository.findOne({
+        where: { id: userId },
+      });
 
-    const skill = this.skillRepository.create({ ...dto, profile });
-    return this.skillRepository.save(skill);
+      if (!profile) throw new NotFoundException('Profile not found');
+
+      const skill = this.skillRepository.create({ ...dto, profile });
+      return this.skillRepository.save(skill);
+    } catch (error) {
+      throw new Error(`Error adding skill: ${error}`);
+    }
   }
 
   async removeSkill(skillId: number): Promise<void> {
-    const skill = await this.skillRepository.findOne({
-      where: { id: skillId },
-    });
-    if (!skill) throw new NotFoundException('Skill not found');
-    await this.skillRepository.remove(skill);
+    try {
+      const skill = await this.skillRepository.findOne({
+        where: { id: skillId },
+      });
+
+      if (!skill) throw new NotFoundException('Skill not found');
+      await this.skillRepository.remove(skill);
+    } catch (error) {
+      throw new Error(`Error removing skill: ${error}`);
+    }
   }
 
   async uploadAvatar(userId: number, avatarUrl: string): Promise<Profile> {
-    const profile = await this.profileRepository.findOne({
-      where: { id: userId },
-    });
+    try {
+      const profile = await this.profileRepository.findOne({
+        where: { id: userId },
+      });
 
-    if (!profile) {
-      throw new Error('Profile not found');
+      if (!profile) {
+        throw new Error('Profile not found');
+      }
+
+      profile.avatar = avatarUrl;
+      return await this.profileRepository.save(profile); // Saqlash
+    } catch (error) {
+      throw new Error(`Error uploading avatar: ${error}`);
     }
-
-    profile.avatar = avatarUrl;
-    return await this.profileRepository.save(profile); // Saqlash
   }
 
   async updateAvatar(profileId: number, avatarUrl: string): Promise<Profile> {
-    await this.profileRepository.update(profileId, { avatar: avatarUrl });
-    return this.getProfile(profileId);
+    try {
+      await this.profileRepository.update(profileId, { avatar: avatarUrl });
+      return this.getProfile(profileId);
+    } catch (error) {
+      throw new Error(`Error updating avatar: ${error}`);
+    }
   }
 }

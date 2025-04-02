@@ -10,14 +10,40 @@ export class SessionService {
   ) {}
 
   async getUserSessions(userId: number) {
-    return this.sessionRepo.find({ where: { user: { id: userId } } });
+    try {
+      const sessions = await this.sessionRepo.find({
+        where: { user: { id: userId } },
+      });
+      if (!sessions.length) {
+        throw new Error('No sessions found for the user');
+      }
+      return sessions;
+    } catch (error) {
+      throw new Error(`Error fetching sessions: ${error}`);
+    }
   }
 
   async logoutSession(sessionId: number) {
-    return this.sessionRepo.delete(sessionId);
+    try {
+      const result = await this.sessionRepo.delete(sessionId);
+      if (result.affected === 0) {
+        throw new Error('Session not found');
+      }
+      return { message: 'Session logged out successfully' };
+    } catch (error) {
+      throw new Error(`Error logging out session: ${error}`);
+    }
   }
 
   async logoutAllSessions(userId: number) {
-    return this.sessionRepo.delete({ user: { id: userId } });
+    try {
+      const result = await this.sessionRepo.delete({ user: { id: userId } });
+      if (result.affected === 0) {
+        throw new Error('No sessions found for the user to log out');
+      }
+      return { message: 'All sessions logged out successfully' };
+    } catch (error) {
+      throw new Error(`Error logging out all sessions: ${error}`);
+    }
   }
 }

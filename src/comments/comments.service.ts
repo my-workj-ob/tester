@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Injectable, NotFoundException } from '@nestjs/common';
+
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IsNull, Repository } from 'typeorm';
 import { Like } from './../like/entities/like.entity';
@@ -25,41 +30,49 @@ export class CommentService {
     page = 1,
     limit = 10,
   ) {
-    console.log('userId', userId);
+    try {
+      const [comments, count] = await this.commentRepository.findAndCount({
+        where: { entityId, entityType, parentComment: IsNull() },
+        relations: [
+          'user',
+          'user.profile',
+          'replies',
+          'replies.user',
+          'replies.user.profile',
+          'replies.likes', // ✅ Replies uchun like-larni qo‘shamiz
+          'replies.likes.user', // ✅ Replies uchun like bosgan userlar ham kerak
+          'likes',
+          'likes.user',
+        ],
+        order: { createdAt: 'DESC' },
+        take: limit,
+        skip: (page - 1) * limit,
+      });
 
-    const [comments, count] = await this.commentRepository.findAndCount({
-      where: { entityId, entityType, parentComment: IsNull() },
-      relations: [
-        'user',
-        'user.profile',
-        'replies',
-        'replies.user',
-        'replies.user.profile',
-        'replies.likes', // ✅ Replies uchun like-larni qo‘shamiz
-        'replies.likes.user', // ✅ Replies uchun like bosgan userlar ham kerak
-        'likes',
-        'likes.user',
-      ],
-      order: { createdAt: 'DESC' },
-      take: limit,
-      skip: (page - 1) * limit,
-    });
+      // Har bir komment va reply-ga `likedByCurrentUser` qo‘shamiz
+      const commentsWithLikeStatus = comments.map((comment) => ({
+        ...comment,
+        likedByCurrentUser: comment.likes.some(
+          (like) => like.user.id === userId,
+        ),
+        replies: comment.replies.map((reply) => ({
+          ...reply,
+          likedByCurrentUser: reply.likes.some(
+            (like) => like.user.id === userId,
+          ), // ✅ Replies uchun like bor yoki yo‘qligini tekshiramiz
+        })),
+      }));
 
-    // Har bir komment va reply-ga `likedByCurrentUser` qo‘shamiz
-    const commentsWithLikeStatus = comments.map((comment) => ({
-      ...comment,
-      likedByCurrentUser: comment.likes.some((like) => like.user.id === userId),
-      replies: comment.replies.map((reply) => ({
-        ...reply,
-        likedByCurrentUser: reply.likes.some((like) => like.user.id === userId), // ✅ Replies uchun like bor yoki yo‘qligini tekshiramiz
-      })),
-    }));
-
-    return {
-      comments: commentsWithLikeStatus,
-      total: count,
-      hasNextPage: count > page * limit,
-    };
+      return {
+        comments: commentsWithLikeStatus,
+        total: count,
+        hasNextPage: count > page * limit,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error occurred while fetching comments: ${error.message}`,
+      );
+    }
   }
 
   async createComment(
@@ -69,88 +82,103 @@ export class CommentService {
     content: string,
     parentCommentId?: number | null,
   ) {
-    const userId = (userPayload as any).userId;
-    const user = await this.userRepository.findOne({
-      where: { id: userId },
-      relations: ['profile'],
-    });
-    console.log('profiles: ', user);
-
-    if (!user) throw new NotFoundException('User not found');
-
-    let parentComment: Comment | null = null;
-    if (parentCommentId) {
-      parentComment = await this.commentRepository.findOne({
-        where: { id: parentCommentId },
-        relations: ['user', 'user.profile'],
+    try {
+      const userId = (userPayload as any).userId;
+      const user = await this.userRepository.findOne({
+        where: { id: userId },
+        relations: ['profile'],
       });
 
-      console.log('created-replay: ', parentComment);
+      if (!user) throw new NotFoundException('User not found');
 
-      if (!parentComment)
-        throw new NotFoundException('Parent comment not found');
+      let parentComment: Comment | null = null;
+      if (parentCommentId) {
+        parentComment = await this.commentRepository.findOne({
+          where: { id: parentCommentId },
+          relations: ['user', 'user.profile'],
+        });
+
+        if (!parentComment)
+          throw new NotFoundException('Parent comment not found');
+      }
+
+      const comment = this.commentRepository.create({
+        user,
+        entityId,
+        entityType,
+        content,
+        likesCount: 0,
+        parentComment: parentComment || undefined,
+      });
+
+      return await this.commentRepository.save(comment);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error occurred while creating comment: ${error.message}`,
+      );
     }
-
-    const comment = this.commentRepository.create({
-      user,
-      entityId,
-      entityType,
-      content,
-      likesCount: 0,
-      parentComment: parentComment || undefined,
-    });
-
-    return this.commentRepository.save(comment);
   }
 
   async deleteComment(commentId: number) {
-    const comment = await this.commentRepository.findOne({
-      where: { id: commentId },
-      relations: ['user'],
-    });
+    try {
+      const comment = await this.commentRepository.findOne({
+        where: { id: commentId },
+        relations: ['user'],
+      });
 
-    if (!comment) throw new NotFoundException('Comment not found');
+      if (!comment) throw new NotFoundException('Comment not found');
 
-    return this.commentRepository.remove(comment);
+      return await this.commentRepository.remove(comment);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error occurred while deleting comment: ${error.message}`,
+      );
+    }
   }
 
   async likeComment(commentId: number, userId: number) {
-    // 1. Kommentni olish
-    const comment = await this.commentRepository.findOne({
-      where: { id: commentId },
-    });
-    if (!comment) throw new NotFoundException('Comment not found');
-
-    // 2. Foydalanuvchi oldin like bosganmi?
-    const existingLike = await this.likeRepository.findOne({
-      where: { comment: { id: commentId }, user: { id: userId } },
-    });
-
-    if (existingLike) {
-      // Agar oldin like bosgan bo‘lsa, uni o‘chiramiz (Unlike)
-      await this.likeRepository.remove(existingLike);
-      comment.likesCount = Math.max(0, comment.likesCount - 1); // 0 dan kam bo‘lmasin
-    } else {
-      // Yangi like yaratish
-      const newLike = this.likeRepository.create({
-        user: { id: userId },
-        comment,
+    try {
+      // 1. Kommentni olish
+      const comment = await this.commentRepository.findOne({
+        where: { id: commentId },
       });
-      await this.likeRepository.save(newLike);
-      comment.likesCount += 1;
+      if (!comment) throw new NotFoundException('Comment not found');
+
+      // 2. Foydalanuvchi oldin like bosganmi?
+      const existingLike = await this.likeRepository.findOne({
+        where: { comment: { id: commentId }, user: { id: userId } },
+      });
+
+      if (existingLike) {
+        // Agar oldin like bosgan bo‘lsa, uni o‘chiramiz (Unlike)
+        await this.likeRepository.remove(existingLike);
+        comment.likesCount = Math.max(0, comment.likesCount - 1); // 0 dan kam bo‘lmasin
+      } else {
+        // Yangi like yaratish
+        const newLike = this.likeRepository.create({
+          user: { id: userId },
+          comment,
+        });
+        await this.likeRepository.save(newLike);
+        comment.likesCount += 1;
+      }
+
+      // likesCount noto‘g‘ri bo‘lsa xato chiqarish
+      if (comment.likesCount === undefined || comment.likesCount === null) {
+        throw new Error('likesCount is undefined or null');
+      }
+
+      // `update` o‘rniga `save` ishlatildi
+      await this.commentRepository.save(comment);
+
+      return {
+        message: existingLike ? 'Like removed' : 'Liked',
+        likes: comment.likesCount,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error occurred while liking comment: ${error.message}`,
+      );
     }
-
-    // likesCount noto‘g‘ri bo‘lsa xato chiqarish
-    if (comment.likesCount === undefined || comment.likesCount === null) {
-      throw new Error('likesCount is undefined or null');
-    }
-
-    // `update` o‘rniga `save` ishlatildi
-    await this.commentRepository.save(comment);
-
-    return {
-      message: existingLike ? 'Like removed' : 'Liked',
-      likes: comment.likesCount,
-    };
   }
 }

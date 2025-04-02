@@ -6,6 +6,7 @@
 import { Injectable } from '@nestjs/common';
 import * as QRCode from 'qrcode';
 import * as speakeasy from 'speakeasy';
+
 @Injectable()
 export class TwoFactorAuthService {
   generateSecret(userId: number): { secret: string; qrCodeUrl: string } | null {
@@ -14,7 +15,7 @@ export class TwoFactorAuthService {
         name: `MyApp (${userId})`,
       });
 
-      if (!secret.base32 || !secret.otpauth_url) {
+      if (!secret?.base32 || !secret?.otpauth_url) {
         throw new Error('Failed to generate 2FA secret');
       }
 
@@ -23,8 +24,7 @@ export class TwoFactorAuthService {
         qrCodeUrl: secret.otpauth_url,
       };
     } catch (error) {
-      console.error('Error generating 2FA secret:', error);
-      return null;
+      throw new Error(`Error generating 2FA secret: ${error.message}`);
     }
   }
 
@@ -32,16 +32,19 @@ export class TwoFactorAuthService {
     try {
       return await QRCode.toDataURL(otpAuthUrl);
     } catch (error) {
-      console.error('Error generating QR Code:', error);
-      throw new Error('Failed to generate QR Code');
+      throw new Error(`Error generating QR Code: ${error.message}`);
     }
   }
 
   verifyToken(secret: string, token: string): boolean {
-    return speakeasy.totp.verify({
-      secret,
-      encoding: 'base32',
-      token,
-    });
+    try {
+      return speakeasy.totp.verify({
+        secret,
+        encoding: 'base32',
+        token,
+      });
+    } catch (error) {
+      throw new Error(`Error verifying token: ${error.message}`);
+    }
   }
 }

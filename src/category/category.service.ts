@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
@@ -12,34 +16,66 @@ export class CategoryService {
   ) {}
 
   async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
-    const category = this.categoryRepository.create(createCategoryDto);
-    return this.categoryRepository.save(category);
+    try {
+      const category = this.categoryRepository.create(createCategoryDto);
+      return await this.categoryRepository.save(category);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error occurred while creating category ${error}`,
+      );
+    }
   }
 
   async findAll(): Promise<Category[]> {
-    return this.categoryRepository.find({ relations: ['skills'] });
+    try {
+      return await this.categoryRepository.find({ relations: ['skills'] });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error occurred while retrieving categories ${error}`,
+      );
+    }
   }
 
   async findOne(id: number): Promise<Category> {
-    const category = await this.categoryRepository.findOne({
-      where: { id },
-      relations: ['skills'],
-    });
-    if (!category)
-      throw new NotFoundException(`Category with ID ${id} not found`);
-    return category;
+    try {
+      const category = await this.categoryRepository.findOne({
+        where: { id },
+        relations: ['skills'],
+      });
+      if (!category) {
+        throw new NotFoundException(`Category with ID ${id} not found`);
+      }
+      return category;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error occurred while retrieving category ${error}`,
+      );
+    }
   }
 
   async update(
     id: number,
     updateCategoryDto: UpdateCategoryDto,
   ): Promise<Category> {
-    await this.categoryRepository.update(id, updateCategoryDto);
-    return this.findOne(id);
+    try {
+      const category = await this.findOne(id);
+      this.categoryRepository.merge(category, updateCategoryDto);
+      return await this.categoryRepository.save(category);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error occurred while updating category ${error}`,
+      );
+    }
   }
 
   async remove(id: number): Promise<void> {
-    const category = await this.findOne(id);
-    await this.categoryRepository.remove(category);
+    try {
+      const category = await this.findOne(id);
+      await this.categoryRepository.remove(category);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error occurred while deleting category ${error}`,
+      );
+    }
   }
 }
