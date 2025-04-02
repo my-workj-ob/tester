@@ -2,9 +2,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Like } from 'src/like/entities/like.entity';
-import { User } from 'src/user/entities/user.entity';
 import { IsNull, Repository } from 'typeorm';
+import { Like } from './../like/entities/like.entity';
+import { User } from './../user/entities/user.entity';
 import { Comment } from './entities/comments.entity';
 
 @Injectable()

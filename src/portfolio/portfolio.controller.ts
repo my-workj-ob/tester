@@ -21,7 +21,7 @@ import {
   ApiOperation,
   ApiResponse,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
 import { PortfolioFilterDto } from './dto/filter.dto';
 import { CreatePortfolioDto } from './dto/portfolio.dto';
 import { Project } from './entities/project.entity';

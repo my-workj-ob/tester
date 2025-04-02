@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Comment } from 'src/comments/entities/comments.entity';
 import { Repository } from 'typeorm';
+import { Comment } from './../comments/entities/comments.entity';
 import { Like } from './entities/like.entity';
 
 @Injectable()

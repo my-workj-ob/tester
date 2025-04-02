@@ -5,9 +5,9 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { Skill } from 'src/skill/entities/skill.entity';
-import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
+import { Skill } from './../skill/entities/skill.entity';
+import { User } from './../user/entities/user.entity';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { SkillDto } from './dto/skill.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';

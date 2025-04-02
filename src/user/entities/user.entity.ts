@@ -1,6 +1,3 @@
-import { RefreshToken } from 'src/auth/entities/refresh-token.entity';
-import { Project } from 'src/portfolio/entities/project.entity';
-import { Profile } from 'src/profile/entities/profile.entity';
 import {
   Column,
   Entity,
@@ -9,11 +6,14 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { RefreshToken } from './../../auth/entities/refresh-token.entity';
+import { Project } from './../../portfolio/entities/project.entity';
+import { Profile } from './../../profile/entities/profile.entity';
 
-import { Comment } from 'src/comments/entities/comments.entity';
-import { Like } from 'src/like/entities/like.entity';
-import { Mentor } from 'src/mentors/entities/mentor.entity';
 import { Session } from '../../security/entities/session.entity';
+import { Comment } from './../../comments/entities/comments.entity';
+import { Like } from './../../like/entities/like.entity';
+import { Mentor } from './../../mentors/entities/mentor.entity';
 
 @Entity()
 export class User {

@@ -1,7 +1,3 @@
-import { Comment } from 'src/comments/entities/comments.entity';
-import { Project } from 'src/portfolio/entities/project.entity';
-import { Skill } from 'src/skill/entities/skill.entity';
-import { User } from 'src/user/entities/user.entity';
 import {
   Column,
   Entity,
@@ -10,6 +6,10 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Comment } from './../../comments/entities/comments.entity';
+import { Project } from './../../portfolio/entities/project.entity';
+import { Skill } from './../../skill/entities/skill.entity';
+import { User } from './../../user/entities/user.entity';
 
 @Entity()
 export class Profile {

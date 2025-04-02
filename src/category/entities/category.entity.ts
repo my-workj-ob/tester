@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Skill } from 'src/skill/entities/skill.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Skill } from './../../skill/entities/skill.entity';
 
 @Entity()
 export class Category {

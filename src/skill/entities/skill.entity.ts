@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Category } from 'src/category/entities/category.entity';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Profile } from '../../profile/entities/profile.entity';
+import { Category } from './../../category/entities/category.entity';
 
 @Entity()
 export class Skill {

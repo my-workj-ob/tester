@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Profile } from 'src/profile/entities/profile.entity';
-import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
+import { Profile } from './../profile/entities/profile.entity';
+import { User } from './../user/entities/user.entity';
 import { PortfolioFilterDto } from './dto/filter.dto';
 import { CreatePortfolioDto } from './dto/portfolio.dto';
 import { Project } from './entities/project.entity';

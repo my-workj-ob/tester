@@ -13,8 +13,8 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Request } from 'express';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { User } from 'src/user/entities/user.entity';
+import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
+import { User } from './../user/entities/user.entity';
 import { CommentService } from './comments.service';
 import { CreateCommentDto } from './dto/commnents.dto';
 export interface RequestWithUser extends Request {

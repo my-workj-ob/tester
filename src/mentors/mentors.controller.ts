@@ -12,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
 import { CreateMentorDto } from './dto/create-mentor.dto';
 import { UpdateMentorVisibilityDto } from './dto/update-mentor-visibility.dto';
 import { Mentor } from './entities/mentor.entity';

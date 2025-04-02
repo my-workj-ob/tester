@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ProfileModule } from 'src/profile/profile.module';
-import { Session } from 'src/security/entities/session.entity';
 import { UserModule } from '../user/user.module';
+import { ProfileModule } from './../profile/profile.module';
+import { Session } from './../security/entities/session.entity';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { RefreshToken } from './entities/refresh-token.entity';

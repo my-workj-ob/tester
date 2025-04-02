@@ -8,11 +8,11 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { Profile } from 'src/profile/entities/profile.entity';
-import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
+import { Profile } from './../profile/entities/profile.entity';
 import { Session } from './../security/entities/session.entity';
+import { User } from './../user/entities/user.entity';
 import { RegisterDto } from './dto/register.dto';
 import { RefreshTokenService } from './refresh-token.service';
 @Injectable()

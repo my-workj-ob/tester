@@ -1,6 +1,3 @@
-import { Like } from 'src/like/entities/like.entity';
-import { Profile } from 'src/profile/entities/profile.entity';
-import { User } from 'src/user/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
@@ -9,6 +6,9 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Like } from './../../like/entities/like.entity';
+import { Profile } from './../../profile/entities/profile.entity';
+import { User } from './../../user/entities/user.entity';
 
 @Entity()
 export class Comment {
