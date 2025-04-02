@@ -6,6 +6,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as express from 'express';
 import { join } from 'path';
 import { AppModule } from './app.module';
+// s
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
