@@ -4,11 +4,27 @@
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as express from 'express';
+import { Express } from 'express';
 import { join } from 'path';
 import { AppModule } from './app.module';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Swagger setup
+  const config = new DocumentBuilder()
+    .setTitle('Auth API')
+    .setDescription('NestJS Authentication API')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
+
+  // Static file serving for uploads
   app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
+
+  // CORS configuration
   app.enableCors({
     origin: (origin, callback) => {
       if (
@@ -26,18 +42,20 @@ async function bootstrap() {
     },
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true, // 🔥 BU MUHIM!
+    credentials: true, // 🔥 This is important!
   });
 
-  const config = new DocumentBuilder()
-    .setTitle('Auth API')
-    .setDescription('NestJS Authentication API')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document);
-  await app.listen(process.env.PORT || 3000);
-  //
+  // Serverless check
+  if (!process.env.IS_SERVERLESS) {
+    await app.listen(3030);
+  }
 }
+
+// Nest server creation for serverless environment
+export const createNestServer = async (): Promise<Express> => {
+  const app = await NestFactory.create(AppModule);
+  await app.init();
+  return app.getHttpAdapter().getInstance() as Express;
+};
+
 bootstrap();
