@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   Body,
   Controller,
@@ -6,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
@@ -30,8 +33,12 @@ export class MentorController {
   @UseGuards(JwtAuthGuard)
   @Post()
   @ApiOperation({ summary: 'Yangi mentor qo‘shish' })
-  createMentor(@Body() createMentorDto: CreateMentorDto): Promise<Mentor> {
-    return this.mentorService.createMentor(createMentorDto);
+  createMentor(
+    @Body() createMentorDto: CreateMentorDto,
+    @Req() req: any,
+  ): Promise<Mentor> {
+    const userId = req.user.userId;
+    return this.mentorService.createMentor(createMentorDto, userId);
   }
   @Patch(':id/private')
   async updateVisibility(

@@ -12,13 +12,13 @@ import {
 
 import { Comment } from 'src/comments/entities/comments.entity';
 import { Like } from 'src/like/entities/like.entity';
+import { Mentor } from 'src/mentors/entities/mentor.entity';
 import { Session } from '../../security/entities/session.entity';
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
-  @Column({ unique: true })
   @Column({ unique: true })
   email: string;
 
@@ -51,4 +51,7 @@ export class User {
 
   @OneToMany(() => Like, (like) => like.user, { cascade: true })
   likes: Like[];
+
+  @OneToMany(() => Mentor, (mentor) => mentor.user, { cascade: true })
+  mentors: Mentor[];
 }

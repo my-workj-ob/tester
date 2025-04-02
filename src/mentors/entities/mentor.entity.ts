@@ -1,4 +1,11 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from 'src/user/entities/user.entity';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { MentorshipRequest } from './mentorship-request.entity';
 
 @Entity()
@@ -7,15 +14,12 @@ export class Mentor {
   id: number;
 
   @Column()
-  name: string;
-
-  @Column()
   title: string;
 
   @Column()
   company: string;
 
-  @Column('text', { array: true })
+  @Column('text', { array: true, default: '{}' })
   skills: string[];
 
   @Column()
@@ -43,6 +47,11 @@ export class Mentor {
   pricingOption: string;
   @Column({ default: false })
   termsAgreed: boolean;
+  @Column({ nullable: true })
+  userId: number;
   @OneToMany(() => MentorshipRequest, (request) => request.mentor)
   mentorshipRequests: MentorshipRequest[];
+
+  @ManyToOne(() => User, (user) => user.mentors, { onDelete: 'CASCADE' })
+  user: User;
 }

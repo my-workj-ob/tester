@@ -1,5 +1,8 @@
-import { Injectable } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateMentorDto } from './dto/create-mentor.dto';
 import { Mentor } from './entities/mentor.entity';
@@ -9,15 +12,32 @@ export class MentorService {
   constructor(
     @InjectRepository(Mentor)
     private mentorRepository: Repository<Mentor>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
   ) {}
 
   async getAllMentors(): Promise<Mentor[]> {
-    return await this.mentorRepository.find();
+    return await this.mentorRepository.find({
+      relations: ['user', 'user.profile'],
+    });
   }
 
-  async createMentor(createMentorDto: CreateMentorDto): Promise<Mentor> {
-    const newMentor = this.mentorRepository.create(createMentorDto);
-    return await this.mentorRepository.save(newMentor);
+  async createMentor(dto: CreateMentorDto, userId): Promise<Mentor> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // ✅ `skills` ni PostgreSQL ARRAY formatida saqlash
+    const mentor = this.mentorRepository.create({
+      ...dto,
+      skills: dto.skills ? dto.skills.map((skill) => skill.trim()) : [],
+      user,
+    });
+
+    return await this.mentorRepository.save(mentor);
   }
 
   async findOne(id: number): Promise<Mentor | null> {

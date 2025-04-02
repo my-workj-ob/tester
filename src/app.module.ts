@@ -13,6 +13,8 @@ import { CommentsModule } from './comments/comments.module';
 import configuration from './config/configuration';
 import { FileController } from './file/file.controller';
 import { FileModule } from './file/file.module';
+import { LikeController } from './like/like.controller';
+import { LikeModule } from './like/like.module';
 import { Mentor } from './mentors/entities/mentor.entity';
 import { MentorsModule } from './mentors/mentors.module';
 import { Project } from './portfolio/entities/project.entity';
@@ -28,8 +30,6 @@ import { SkillModule } from './skill/skill.module';
 import { SkillService } from './skill/skill.service';
 import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
-import { LikeController } from './like/like.controller';
-import { LikeModule } from './like/like.module';
 
 @Module({
   imports: [

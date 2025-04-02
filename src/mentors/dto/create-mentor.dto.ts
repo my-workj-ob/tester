@@ -1,73 +1,39 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateMentorDto {
-  @ApiProperty({ example: 'John Doe', description: 'Mentorning to‘liq ismi' })
-  name: string;
-
-  @ApiProperty({
-    example: 'Senior Developer',
-    description: 'Mentorning kasbiy unvoni',
-  })
+  @ApiProperty({ example: 'Senior Developer', description: 'Kasbiy unvon' })
   title: string;
 
-  @ApiProperty({
-    example: 'TechCorp',
-    description: 'Mentor ishlaydigan kompaniya',
-  })
+  @ApiProperty({ example: 'TechCorp', description: 'Ish joyi' })
   company: string;
 
-  @ApiProperty({
-    type: [String],
-    example: ['React', 'Node.js', 'TypeScript'],
-    description: 'Mentorning egallagan texnologiyalari',
-  })
+  @ApiProperty({ type: [String], example: ['React', 'Node.js'] })
   skills: string[];
 
-  @ApiProperty({ example: 5, description: 'Mentorning tajribasi (yillarda)' })
+  @ApiProperty({ example: 5, description: 'Tajribasi (yillarda)' })
   experienceYears: number;
 
-  @ApiProperty({ example: 50, description: 'Mentorning soatlik narxi (USD)' })
+  @ApiProperty({ example: 50, description: 'Soatlik narx (USD)' })
   hourlyRate: number;
 
-  @ApiProperty({
-    example: 'Frontend Development',
-    description: 'Mentorning asosiy mutaxassisligi',
-  })
+  @ApiProperty({ example: 'Frontend Development' })
   expertise: string;
 
-  @ApiProperty({
-    required: false,
-    example:
-      'Experienced web developer specializing in modern frontend technologies.',
-    description: 'Mentor haqida qisqacha ma’lumot',
-  })
+  @ApiProperty({ required: false, example: 'Senior frontend dev' })
   bio?: string;
 
-  @ApiProperty({
-    required: false,
-    example:
-      'Looking for mentees passionate about JavaScript and UI/UX design.',
-    description:
-      'Mentor o‘z shogirdlaridan nimani kutishi haqida qisqacha yozuv',
-  })
+  @ApiProperty({ required: false, example: 'Looking for JS mentees' })
   expectations?: string;
 
-  @ApiProperty({
-    required: false,
-    example: 10,
-    description: 'Mentorning haftasiga necha soat ishlashi mumkinligi',
-  })
+  @ApiProperty({ required: false, example: 10 })
   weeklyAvailability?: number;
 
-  @ApiProperty({
-    example: 'Hourly',
-    description: 'Mentor narx strategiyasi (Fixed yoki Hourly)',
-  })
+  @ApiProperty({ example: 'Hourly' })
   pricingOption: string;
 
-  @ApiProperty({
-    example: true,
-    description: 'Mentor shartlarga rozi bo‘lganligini tasdiqlaydi',
-  })
+  @ApiProperty({ example: true })
   termsAgreed: boolean;
+
+  @ApiProperty({ example: 1, description: 'User ID' }) // ✅ To‘g‘ri bog‘lash
+  userId: number;
 }
