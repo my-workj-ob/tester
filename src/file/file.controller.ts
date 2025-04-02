@@ -16,7 +16,6 @@ const uploadPath = '/tmp/uploads'; // Yangi yo'l
 @Controller('file')
 export class FileController {
   constructor(private readonly fileService: FileService) {}
-  // upload
   @Post('upload')
   @UseInterceptors(
     FileInterceptor('file', {
