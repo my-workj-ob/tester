@@ -16,7 +16,6 @@ async function bootstrap() {
       credentials: true,
     }),
   );
-
   app.useWebSocketAdapter(new IoAdapter(app));
 
   const config = new DocumentBuilder()
