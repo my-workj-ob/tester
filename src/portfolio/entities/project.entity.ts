@@ -5,9 +5,11 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Profile } from './../../profile/entities/profile.entity';
+import { Rating } from './../../statistics/entities/rating.entity';
 import { User } from './../../user/entities/user.entity';
 
 @Entity()
@@ -83,4 +85,7 @@ export class Project {
   @ManyToMany(() => User, (user) => user.likedProjects)
   @JoinTable()
   likes: User[];
+
+  @OneToMany(() => Rating, (ratings) => ratings.project)
+  ratings: Rating[];
 }

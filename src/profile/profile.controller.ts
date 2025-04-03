@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   BadRequestException,
@@ -5,6 +6,7 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   Patch,
   Post,
@@ -23,6 +25,7 @@ import {
 } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { UploadService } from 'src/file/uploadService';
 import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { SkillDto } from './dto/skill.dto';
@@ -35,7 +38,10 @@ import { ProfileService } from './profile.service';
 @ApiBearerAuth() // Swaggerda token qo'shish uchun
 @Controller('profile')
 export class ProfileController {
-  constructor(private readonly profileService: ProfileService) {}
+  constructor(
+    private readonly uploadService: UploadService, // Inject the UploadService
+    private readonly profileService: ProfileService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Get()
@@ -120,6 +126,19 @@ export class ProfileController {
       throw new BadRequestException('Avatar URL is required');
     }
 
+    // Avatar URL-ni yangilash
     return this.profileService.updateAvatar(profileId, avatarUrl);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/stats')
+  async getProfileStats(@Param('id') id: number) {
+    try {
+      // Call the service method to get profile stats
+      return await this.profileService.getProfileStats(id);
+    } catch (error) {
+      // Handle errors (for example, user not found)
+      throw new NotFoundException(`User not found: ${error}`);
+    }
   }
 }

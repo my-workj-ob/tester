@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  JoinColumn,
   ManyToMany,
   OneToMany,
   OneToOne,
@@ -10,10 +11,12 @@ import { RefreshToken } from './../../auth/entities/refresh-token.entity';
 import { Project } from './../../portfolio/entities/project.entity';
 import { Profile } from './../../profile/entities/profile.entity';
 
+import { Message } from 'src/chat/entities/chat.entity';
 import { Session } from '../../security/entities/session.entity';
 import { Comment } from './../../comments/entities/comments.entity';
 import { Like } from './../../like/entities/like.entity';
 import { Mentor } from './../../mentors/entities/mentor.entity';
+import { ProfileStat } from './profile-stat.entity';
 
 @Entity()
 export class User {
@@ -54,4 +57,13 @@ export class User {
 
   @OneToMany(() => Mentor, (mentor) => mentor.user, { cascade: true })
   mentors: Mentor[];
+  @OneToOne(() => ProfileStat)
+  @JoinColumn()
+  profileStat: ProfileStat;
+
+  @OneToMany(() => Message, (message) => message.sender)
+  sentMessages: Message[];
+
+  @OneToMany(() => Message, (message) => message.receiver)
+  receivedMessages: Message[];
 }

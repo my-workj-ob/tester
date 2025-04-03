@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   BadRequestException,
   Injectable,
@@ -5,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import { ProfileStat } from 'src/user/entities/profile-stat.entity';
 import { Repository } from 'typeorm';
 import { Skill } from './../skill/entities/skill.entity';
 import { User } from './../user/entities/user.entity';
@@ -26,6 +28,9 @@ export class ProfileService {
 
     @InjectRepository(User) // User uchun inject qilish kerak
     private readonly userRepository: Repository<User>,
+
+    @InjectRepository(ProfileStat)
+    private profileStatRepository: Repository<ProfileStat>,
   ) {}
 
   async updateNotifications(userId: number, dto: UpdateNotificationDto) {
@@ -167,5 +172,30 @@ export class ProfileService {
     } catch (error) {
       throw new Error(`Error updating avatar: ${error}`);
     }
+  }
+
+  async getProfileStats(userId: number) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['profileStat', 'user.profile'],
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const profileStat = user.profileStat;
+
+    return {
+      id: user.id,
+      user: {
+        user,
+      },
+      rating: profileStat.rating,
+      content: profileStat.content,
+      date: profileStat.date,
+      likes: profileStat.likes,
+      replies: profileStat.replies,
+    };
   }
 }

@@ -2,15 +2,17 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { NestFactory } from '@nestjs/core';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import * as express from 'express';
+import cors from 'cors';
+import express from 'express';
 import { join } from 'path';
 import { AppModule } from './app.module';
-// s
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
-
+  const server = express();
+  server.use(cors());
   app.enableCors({
     origin: (origin, callback) => {
       if (
@@ -30,6 +32,7 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   });
+  app.useWebSocketAdapter(new IoAdapter(app));
   // fix cors
   const config = new DocumentBuilder()
     .setTitle('Auth API')

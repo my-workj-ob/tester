@@ -1,49 +1,30 @@
 import {
   Controller,
   Post,
-  Req,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Request } from 'express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
 import { FileService } from './file.service';
+import { UploadService } from './uploadService';
 
 @Controller('file')
 export class FileController {
-  constructor(private readonly fileService: FileService) {}
+  constructor(
+    private readonly fileService: FileService,
+    private readonly uploadService: UploadService,
+  ) {}
 
   @Post('upload')
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, cb) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          cb(
-            null,
-            file.fieldname + '-' + uniqueSuffix + extname(file.originalname),
-          );
-        },
-      }),
-    }),
-  )
-  async uploadFile(
-    @UploadedFile() file: Express.Multer.File,
-    @Req() req: Request,
-  ) {
+  @UseInterceptors(FileInterceptor('file')) // Multer buffer orqali olish
+  async uploadFile(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
       throw new Error('File is missing');
     }
 
-    // const host = `${req.protocol}://${req.get('host')}`;
-    const fileUrl = `${'https://tester-nu-two.vercel.app'}/uploads/${file.filename}`;
+    // Faylni Vercel Blob-ga yuklash
+    const vercelFileUrl = await this.uploadService.uploadFile(file);
 
-    const savedFile = await this.fileService.saveFile(fileUrl);
-
-    return { fileId: savedFile.id, fileUrl: savedFile.url };
+    return { url: vercelFileUrl };
   }
 }

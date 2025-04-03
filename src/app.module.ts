@@ -8,6 +8,9 @@ import { RefreshToken } from './auth/entities/refresh-token.entity';
 import { CategoryModule } from './category/category.module';
 import { CategoryService } from './category/category.service';
 import { Category } from './category/entities/category.entity';
+import { ChatController } from './chat/chat.controller';
+import { ChatModule } from './chat/chat.module';
+import { Message } from './chat/entities/chat.entity';
 import { CommentController } from './comments/comments.controller';
 import { CommentsModule } from './comments/comments.module';
 import configuration from './config/configuration';
@@ -28,6 +31,7 @@ import { Skill } from './skill/entities/skill.entity';
 import { SkillController } from './skill/skill.controller';
 import { SkillModule } from './skill/skill.module';
 import { SkillService } from './skill/skill.service';
+import { StatisticsModule } from './statistics/statistics.module';
 import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
 
@@ -42,7 +46,16 @@ import { UserModule } from './user/user.module';
       url: process.env.DATABASE_URL,
       autoLoadEntities: true,
       synchronize: true, // ❗ Production uchun false qo‘ying
-      entities: [User, RefreshToken, Profile, Project, Mentor, Category, Skill],
+      entities: [
+        User,
+        RefreshToken,
+        Profile,
+        Project,
+        Mentor,
+        Category,
+        Skill,
+        Message,
+      ],
     }),
     AuthModule,
     UserModule,
@@ -55,6 +68,8 @@ import { UserModule } from './user/user.module';
     FileModule,
     CommentsModule,
     LikeModule,
+    StatisticsModule,
+    ChatModule,
   ],
   controllers: [
     AppController,
@@ -64,6 +79,7 @@ import { UserModule } from './user/user.module';
     FileController,
     CommentController,
     LikeController,
+    ChatController,
   ],
   providers: [AppService, SkillService, CategoryService],
 })
