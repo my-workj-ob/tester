@@ -1,10 +1,10 @@
 import { NestFactory } from '@nestjs/core';
-import { IoAdapter } from '@nestjs/platform-socket.io';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cors from 'cors';
 import express from 'express';
 import { join } from 'path';
 import { AppModule } from './app.module';
+import { CustomIoAdapter } from './config/customIoAdapter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -16,8 +16,7 @@ async function bootstrap() {
       credentials: true,
     }),
   );
-
-  app.useWebSocketAdapter(new IoAdapter(app));
+  app.useWebSocketAdapter(new CustomIoAdapter(app));
 
   const config = new DocumentBuilder()
     .setTitle('Auth API')
