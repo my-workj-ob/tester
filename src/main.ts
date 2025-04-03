@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -11,29 +12,30 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use('/uploads', express.static(join(__dirname, '..', 'uploads')));
+
+  app.use((req, res, next) => {
+    res.header(
+      'Access-Control-Allow-Origin',
+      'https://it-experts-nine.vercel.app',
+    );
+    res.header(
+      'Access-Control-Allow-Methods',
+      'GET, POST, PUT, DELETE, OPTIONS',
+    );
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
+
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
+
+    next();
+  });
+
   const server = express();
   server.use(cors());
-  app.enableCors({
-    origin: (origin, callback) => {
-      if (
-        !origin ||
-        [
-          'https://it-experts-nine.vercel.app',
-          'http://localhost:3000',
-          'http://localhost:3030',
-        ].includes(origin)
-      ) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-  });
   app.useWebSocketAdapter(new IoAdapter(app));
-  // fix cors
+
   const config = new DocumentBuilder()
     .setTitle('Auth API')
     .setDescription('NestJS Authentication API')
@@ -49,4 +51,5 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT || 3000);
 }
+bootstrap();
 bootstrap();
