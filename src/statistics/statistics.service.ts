@@ -3,9 +3,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Project } from 'src/portfolio/entities/project.entity';
-import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
+import { Project } from './../portfolio/entities/project.entity';
+import { User } from './../user/entities/user.entity';
 import { Rating } from './entities/rating.entity';
 
 @Injectable()

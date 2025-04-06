@@ -1,68 +1,102 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  NotFoundException,
   Param,
-  Patch,
   Post,
-  Query,
+  Put,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import {
-  ApiBody,
-  ApiOperation,
-  ApiParam,
-  ApiResponse,
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { CreateSkillDto } from './create-skill.dto';
+import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
+import { CreateSkillDto } from './dto/create-skill.dto';
+import { UpdateSkillDto } from './dto/update-skill.dto';
 import { Skill } from './entities/skill.entity';
 import { SkillService } from './skill.service';
+// import { AuthGuard } from '@nestjs/passport'; // Agar autentifikatsiya bo'lsa
 
-@ApiTags('Skills') // ✅ Swagger kategoriyasi
-@Controller('profiles/:profileId/skills')
+@ApiTags('Skills')
+@ApiBearerAuth() // Agar autentifikatsiya bo'lsa
+@UseGuards(JwtAuthGuard) // Agar autentifikatsiya bo'lsa
+@Controller('skills')
 export class SkillController {
   constructor(private readonly skillService: SkillService) {}
 
-  @Get()
-  @ApiOperation({ summary: 'Get all skills for a profile' })
-  @ApiResponse({ status: 200, description: 'List of skills', type: [Skill] })
-  async getProfileSkills(
-    @Param('profileId') profileId: number,
-    @Query('isPublic') isPublic: string, // `@Query()` orqali olish
-  ): Promise<Skill[]> {
-    return this.skillService.findAllByProfile(profileId, isPublic === 'true');
-  }
-
-  @Post()
-  @ApiOperation({ summary: 'Add a new skill to a profile' })
-  @ApiResponse({ status: 201, description: 'New skill created', type: Skill })
-  @ApiBody({ type: CreateSkillDto })
-  async addSkill(
-    @Param('profileId') profileId: number,
-    @Body() skillData: CreateSkillDto,
-  ): Promise<Skill> {
-    return this.skillService.create(profileId, skillData);
-  }
-  @Post(':profileId')
-  async create(
-    @Param('profileId') profileId: number,
-    @Body() skillData: CreateSkillDto,
-  ) {
-    return this.skillService.create(profileId, skillData);
-  }
-  @Patch(':skillId/endorse')
-  @ApiOperation({ summary: 'Endorse a skill' })
-  @ApiResponse({
-    status: 200,
-    description: 'Skill endorsed successfully',
+  @Post('')
+  @ApiCreatedResponse({
+    description: "Ko'nikma muvaffaqiyatli yaratildi",
     type: Skill,
   })
-  @ApiParam({ name: 'profileId', description: 'Profile ID' })
-  @ApiParam({ name: 'skillId', description: 'Skill ID' })
-  async endorseSkill(
-    @Param('profileId') profileId: number,
-    @Param('skillId') skillId: number,
+  @Post()
+  @ApiCreatedResponse({
+    description: "Ko'nikma muvaffaqiyatli yaratildi",
+    type: Skill,
+  })
+  async create(
+    @Req() req: any,
+    @Body() createSkillDto: CreateSkillDto,
   ): Promise<Skill> {
-    return this.skillService.endorseSkill(profileId, skillId);
+    const userId = req.user.userId as number;
+    return this.skillService.create(userId, createSkillDto);
+  }
+
+  @Get('/grouped')
+  @ApiOkResponse({
+    description: "Skilllar kategoriyalar bo'yicha guruhlangan",
+    type: 'object',
+  })
+  async getGroupedSkills(): Promise<{ [key: string]: Skill[] }> {
+    return this.skillService.getSkillsGroupedByCategory();
+  }
+
+  @Get('')
+  @ApiOkResponse({
+    description: "Foydalanuvchining barcha ko'nikmalari",
+    type: [Skill],
+  })
+  async findAllByUserId(@Req() req: any): Promise<Skill[]> {
+    const userId = req.user.userId as number;
+    return this.skillService.findAllByUserId(+userId);
+  }
+
+  @Get(':id')
+  @ApiOkResponse({ description: "Ko'nikma", type: Skill })
+  @ApiNotFoundResponse({ description: "Ko'nikma topilmadi" })
+  async findOne(@Param('id') id: string): Promise<Skill> {
+    const skill = await this.skillService.findOne(+id);
+    if (!skill) {
+      throw new NotFoundException(`Ko'nikma ${id} topilmadi`);
+    }
+    return skill;
+  }
+
+  @Put(':id')
+  @ApiOkResponse({
+    description: "Ko'nikma muvaffaqiyatli yangilandi",
+    type: Skill,
+  })
+  @ApiNotFoundResponse({ description: "Ko'nikma topilmadi" })
+  async update(
+    @Param('id') id: number,
+    @Body() updateSkillDto: UpdateSkillDto,
+  ): Promise<Skill> {
+    return this.skillService.update(id, updateSkillDto);
+  }
+
+  @Delete(':id')
+  @ApiOkResponse({ description: "Ko'nikma muvaffaqiyatli o'chirildi" })
+  @ApiNotFoundResponse({ description: "Ko'nikma topilmadi" })
+  async remove(@Param('id') id: number): Promise<void> {
+    return this.skillService.remove(id);
   }
 }

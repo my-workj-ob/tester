@@ -49,6 +49,7 @@ export class Mentor {
   termsAgreed: boolean;
   @Column({ nullable: true })
   userId: number;
+
   @OneToMany(() => MentorshipRequest, (request) => request.mentor)
   mentorshipRequests: MentorshipRequest[];
 

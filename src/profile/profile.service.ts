@@ -6,9 +6,9 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { ProfileStat } from 'src/user/entities/profile-stat.entity';
 import { Repository } from 'typeorm';
 import { Skill } from './../skill/entities/skill.entity';
+import { ProfileStat } from './../user/entities/profile-stat.entity';
 import { User } from './../user/entities/user.entity';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { SkillDto } from './dto/skill.dto';
@@ -38,6 +38,7 @@ export class ProfileService {
       const profile = await this.profileRepository.findOne({
         where: { user: { id: userId } },
       });
+
       if (!profile) throw new BadRequestException('Foydalanuvchi topilmadi');
 
       Object.assign(profile, dto);
@@ -89,7 +90,7 @@ export class ProfileService {
     try {
       const profile = await this.profileRepository.findOne({
         where: { id: userId },
-        relations: ['user'], // Profilga bog‘langan user ma’lumotlarini yuklash
+        relations: ['user', 'skills'], // Profilga bog‘langan user ma’lumotlarini yuklash
       });
 
       if (!profile) {

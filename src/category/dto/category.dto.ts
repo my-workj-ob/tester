@@ -1,11 +1,22 @@
-import { PartialType } from '@nestjs/mapped-types';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateCategoryDto {
-  @ApiProperty({ description: 'Category name', example: 'Technical' })
+  @ApiProperty()
   @IsNotEmpty()
+  @IsString()
   name: string;
-}
 
-export class UpdateCategoryDto extends PartialType(CreateCategoryDto) {}
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @ApiProperty({ required: false, type: 'number' })
+  @IsOptional()
+  @IsNumber()
+  parentId?: number | null;
+  @ApiProperty({ required: false, type: 'number' })
+  @IsNumber()
+  categoryId?: number;
+}

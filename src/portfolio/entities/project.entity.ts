@@ -1,13 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinTable,
   ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
+import { Category } from './../../category/entities/category.entity';
 import { Profile } from './../../profile/entities/profile.entity';
 import { Rating } from './../../statistics/entities/rating.entity';
 import { User } from './../../user/entities/user.entity';
@@ -22,8 +25,14 @@ export class Project {
   @ApiProperty({ example: 'E-commerce Website', description: 'Loyiha nomi' })
   title: string;
 
-  @Column({ type: 'varchar', nullable: true })
-  category?: string;
+  @ManyToOne(() => Category, (category) => category.projects, {
+    onDelete: 'SET NULL', // Ixtiyoriy: Agar bog'langan Kategoriya o'chirilsa nima qilish kerakligi
+    // 'SET NULL' - Bu loyihadagi categoryId ni NULL qiladi
+    // 'CASCADE' - Kategoriya o'chirilsa, bog'liq loyihalarni ham o'chiradi
+    // 'RESTRICT' - Agar loyiha bog'liq bo'lsa, kategoriyani o'chirishga yo'l qo'ymaydi
+  })
+  category: Category; // Bog'langan Category ob'ektini saqlaydigan maydon.
+  // TypeORM avtomatik ravishda 'categoryId' nomli tashqi kalit (foreign key) ustunini yaratadi.
 
   @Column({ type: 'text', nullable: true })
   @ApiProperty({
@@ -88,4 +97,17 @@ export class Project {
 
   @OneToMany(() => Rating, (ratings) => ratings.project)
   ratings: Rating[];
+
+  @CreateDateColumn({
+    type: 'timestamp with time zone',
+    default: () => 'CURRENT_TIMESTAMP',
+  }) // Avtomatik ravishda yaratilish vaqtini qo'yadi
+  createdAt: Date;
+
+  @UpdateDateColumn({
+    type: 'timestamp with time zone',
+    default: () => 'CURRENT_TIMESTAMP',
+    onUpdate: 'CURRENT_TIMESTAMP',
+  }) // Avtomatik ravishda yangilanish vaqtini qo'yadi
+  updatedAt: Date;
 }

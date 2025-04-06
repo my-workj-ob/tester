@@ -10,12 +10,15 @@ import { Repository } from 'typeorm';
 import { User } from './../user/entities/user.entity';
 import { CreateMentorDto } from './dto/create-mentor.dto';
 import { Mentor } from './entities/mentor.entity';
+import { MentorshipRequest } from './entities/mentorship-request.entity';
 
 @Injectable()
 export class MentorService {
   constructor(
     @InjectRepository(Mentor)
     private mentorRepository: Repository<Mentor>,
+    @InjectRepository(MentorshipRequest)
+    private mentorShipRepository: Repository<MentorshipRequest>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
   ) {}
@@ -37,11 +40,12 @@ export class MentorService {
       const user = await this.userRepository.findOne({
         where: { id: userId },
       });
+      console.log(user);
+
       if (!user) {
         throw new NotFoundException('User not found');
       }
 
-      // ✅ `skills` ni PostgreSQL ARRAY formatida saqlash
       const mentor = this.mentorRepository.create({
         ...dto,
         skills: dto.skills ? dto.skills.map((skill) => skill.trim()) : [],
@@ -78,6 +82,22 @@ export class MentorService {
     } catch (error) {
       throw new InternalServerErrorException(
         `Error updating mentor visibility: ${error}`,
+      );
+    }
+  }
+
+  async getMyMentorships(userId: number) {
+    try {
+      return await this.mentorShipRepository.find({
+        where: [
+          { mentee: { id: userId } },
+          { mentor: { user: { id: userId } } },
+        ],
+        relations: ['mentee', 'mentor', 'mentor.user'],
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error fetching mentorships: ${error}`,
       );
     }
   }

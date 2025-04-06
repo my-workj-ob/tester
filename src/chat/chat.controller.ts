@@ -11,9 +11,9 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
+import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
+import { User } from './../user/entities/user.entity';
 import { ChatService } from './chat.service';
 import { ChatGateway } from './chatgateway';
 import { Message } from './entities/chat.entity';

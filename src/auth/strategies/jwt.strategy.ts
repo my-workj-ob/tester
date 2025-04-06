@@ -21,6 +21,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   validate(payload: User) {
-    return { userId: payload.sub, email: payload.email };
+    return {
+      userId: payload.sub,
+      email: payload.email,
+      exp:
+        Math.floor(Date.now() / 1000) +
+        parseInt(process.env.JWT_EXPIRATION || '3600'),
+    };
   }
 }

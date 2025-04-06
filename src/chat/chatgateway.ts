@@ -12,8 +12,8 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import type { Server, Socket } from 'socket.io';
-import { User } from 'src/user/entities/user.entity';
 import type { Repository } from 'typeorm';
+import { User } from './../user/entities/user.entity';
 import { Message } from './entities/chat.entity';
 
 @WebSocketGateway({

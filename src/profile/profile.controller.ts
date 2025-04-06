@@ -25,8 +25,8 @@ import {
 } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-import { UploadService } from 'src/file/uploadService';
 import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
+import { UploadService } from './../file/uploadService';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { SkillDto } from './dto/skill.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';

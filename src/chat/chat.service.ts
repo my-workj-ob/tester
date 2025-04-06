@@ -4,8 +4,8 @@
 // chat.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
+import { User } from './.../../../user/entities/user.entity';
 import { Message } from './entities/chat.entity';
 
 @Injectable()

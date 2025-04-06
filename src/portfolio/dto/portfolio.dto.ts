@@ -78,6 +78,11 @@ export class CreatePortfolioDto {
   @ValidateNested({ each: true })
   @Type(() => ImageDto)
   images: ImageDto[];
+  @ApiProperty({
+    example: '0',
+    description: 'categoryId',
+  })
+  categoryId: number;
 }
 
 export class UpdatePortfolioDto {

@@ -11,11 +11,15 @@ import { RefreshToken } from './../../auth/entities/refresh-token.entity';
 import { Project } from './../../portfolio/entities/project.entity';
 import { Profile } from './../../profile/entities/profile.entity';
 
-import { Message } from 'src/chat/entities/chat.entity';
 import { Session } from '../../security/entities/session.entity';
+import { AssessmentResult } from './../../assessment-result/entities/assements-result.entity';
+import { Message } from './../../chat/entities/chat.entity';
+import { CodingSubmission } from './../../coding-submission/entities/coding-submission.entity';
 import { Comment } from './../../comments/entities/comments.entity';
 import { Like } from './../../like/entities/like.entity';
 import { Mentor } from './../../mentors/entities/mentor.entity';
+import { MentorshipRequest } from './../../mentors/entities/mentorship-request.entity';
+import { Skill } from './../../skill/entities/skill.entity';
 import { ProfileStat } from './profile-stat.entity';
 
 @Entity()
@@ -66,4 +70,20 @@ export class User {
 
   @OneToMany(() => Message, (message) => message.receiver)
   receivedMessages: Message[];
+
+  @OneToMany(() => User, (user) => user.mentorshipRequests)
+  mentorshipRequests: MentorshipRequest[]; // 🔥 Mentee bog‘lanishi qo‘shildi
+
+  @OneToMany(
+    () => AssessmentResult,
+    (assessmentResult) => assessmentResult.user,
+  )
+  assessmentResults: AssessmentResult[];
+  @OneToMany(() => Skill, (skill) => skill.user)
+  skills: Skill[];
+
+  @OneToMany(() => CodingSubmission, (submission) => submission.user, {
+    cascade: true, // optional
+  })
+  codingSubmissions: CodingSubmission[];
 }
