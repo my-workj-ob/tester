@@ -9,7 +9,7 @@ import { SkillService } from './skill.service';
   imports: [
     TypeOrmModule.forFeature([Skill]),
     forwardRef(() => CategoryModule),
-  ], // ✅ MUHIM: forwardRef ishlatyapmiz],
+  ],
   controllers: [SkillController],
   providers: [SkillService],
   exports: [SkillService],

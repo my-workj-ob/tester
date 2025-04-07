@@ -31,6 +31,7 @@ import { ProfileModule } from './profile/profile.module';
 import { QuestionModule } from './questions/questions.module';
 import { TwoFactorAuthController } from './security/security.controller';
 import { SecurityModule } from './security/security.module';
+import { SkillSuggestion } from './skill-suggestion/entities/skill-suggestion.entity';
 import { SkillSuggestionController } from './skill-suggestion/skill-suggestion.controller';
 import { SkillSuggestionModule } from './skill-suggestion/skill-suggestion.module';
 import { Skill } from './skill/entities/skill.entity';
@@ -41,6 +42,8 @@ import { StatisticsModule } from './statistics/statistics.module';
 import { User } from './user/entities/user.entity';
 import { UserController } from './user/user.controller';
 import { UserModule } from './user/user.module';
+import { UserService } from './user/user.service';
+import { JobsModule } from './jobs/jobs.module';
 
 @Module({
   imports: [
@@ -53,6 +56,7 @@ import { UserModule } from './user/user.module';
       url: process.env.DATABASE_URL,
       autoLoadEntities: true,
       synchronize: true, // ❗ Production uchun false qo‘ying
+      logging: true,
       entities: [
         User,
         RefreshToken,
@@ -62,6 +66,7 @@ import { UserModule } from './user/user.module';
         Category,
         Skill,
         Message,
+        SkillSuggestion,
       ],
     }),
     AuthModule,
@@ -82,6 +87,7 @@ import { UserModule } from './user/user.module';
     QuestionModule,
     CodingSubmissionModule,
     SkillSuggestionModule,
+    JobsModule,
   ],
   controllers: [
     AppController,
@@ -95,6 +101,6 @@ import { UserModule } from './user/user.module';
     SkillSuggestionController,
     UserController,
   ],
-  providers: [AppService, SkillService, CategoryService],
+  providers: [AppService, SkillService, CategoryService, UserService],
 })
 export class AppModule {}

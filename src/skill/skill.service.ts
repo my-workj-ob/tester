@@ -17,7 +17,7 @@ export class SkillService {
   constructor(
     @InjectRepository(Skill)
     private readonly skillRepository: Repository<Skill>,
-    @Inject(forwardRef(() => CategoryService)) // ✅ decorator to‘g‘ri ishlatilgan
+    @Inject(forwardRef(() => CategoryService))
     private readonly categoryService: CategoryService,
   ) {}
 

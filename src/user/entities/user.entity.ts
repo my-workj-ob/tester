@@ -16,6 +16,7 @@ import { AssessmentResult } from './../../assessment-result/entities/assements-r
 import { Message } from './../../chat/entities/chat.entity';
 import { CodingSubmission } from './../../coding-submission/entities/coding-submission.entity';
 import { Comment } from './../../comments/entities/comments.entity';
+import { Job } from './../../jobs/entity/jobs.entity';
 import { Like } from './../../like/entities/like.entity';
 import { Mentor } from './../../mentors/entities/mentor.entity';
 import { MentorshipRequest } from './../../mentors/entities/mentorship-request.entity';
@@ -86,4 +87,7 @@ export class User {
     cascade: true, // optional
   })
   codingSubmissions: CodingSubmission[];
+
+  @OneToMany(() => Job, (job) => job.employer)
+  jobs: Job[];
 }
