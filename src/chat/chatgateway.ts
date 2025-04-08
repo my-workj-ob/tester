@@ -15,7 +15,7 @@ import type { Server, Socket } from 'socket.io';
 import type { Repository } from 'typeorm';
 import { User } from './../user/entities/user.entity';
 import { Message } from './entities/chat.entity';
-// s
+//
 @WebSocketGateway({
   cors: {
     origin: ['http://localhost:3030', 'https://tester-nu-two.vercel.app'],
