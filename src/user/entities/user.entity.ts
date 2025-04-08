@@ -11,6 +11,7 @@ import { RefreshToken } from './../../auth/entities/refresh-token.entity';
 import { Project } from './../../portfolio/entities/project.entity';
 import { Profile } from './../../profile/entities/profile.entity';
 
+import { Connection } from 'src/connection/entity/connection.entity';
 import { Session } from '../../security/entities/session.entity';
 import { AssessmentResult } from './../../assessment-result/entities/assements-result.entity';
 import { Message } from './../../chat/entities/chat.entity';
@@ -90,4 +91,14 @@ export class User {
 
   @OneToMany(() => Job, (job) => job.employer)
   jobs: Job[];
+  @OneToMany(() => Connection, (connection) => connection.receiver)
+  receivedConnections: Connection[];
+
+  @OneToMany(() => Connection, (connection) => connection.requester)
+  sentConnections: Connection[];
+  @Column({ default: 0 }) // Qo'shilgan ustun
+  profileViews: number;
+
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' }) // Agar yo'q bo'lsa, qo'shing
+  updatedAt: Date;
 }

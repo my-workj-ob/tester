@@ -17,8 +17,12 @@ import { CodingSubmissionModule } from './coding-submission/coding-submission.mo
 import { CommentController } from './comments/comments.controller';
 import { CommentsModule } from './comments/comments.module';
 import configuration from './config/configuration';
+import { ConnectionModule } from './connection/connection.module';
+import { ExplorerModule } from './explorer/explorer.module';
+import { ExploreService } from './explorer/explorer.service';
 import { FileController } from './file/file.controller';
 import { FileModule } from './file/file.module';
+import { JobsModule } from './jobs/jobs.module';
 import { LikeController } from './like/like.controller';
 import { LikeModule } from './like/like.module';
 import { Mentor } from './mentors/entities/mentor.entity';
@@ -43,7 +47,6 @@ import { User } from './user/entities/user.entity';
 import { UserController } from './user/user.controller';
 import { UserModule } from './user/user.module';
 import { UserService } from './user/user.service';
-import { JobsModule } from './jobs/jobs.module';
 
 @Module({
   imports: [
@@ -88,6 +91,8 @@ import { JobsModule } from './jobs/jobs.module';
     CodingSubmissionModule,
     SkillSuggestionModule,
     JobsModule,
+    ConnectionModule,
+    ExplorerModule,
   ],
   controllers: [
     AppController,
@@ -101,6 +106,12 @@ import { JobsModule } from './jobs/jobs.module';
     SkillSuggestionController,
     UserController,
   ],
-  providers: [AppService, SkillService, CategoryService, UserService],
+  providers: [
+    AppService,
+    SkillService,
+    CategoryService,
+    UserService,
+    ExploreService,
+  ],
 })
 export class AppModule {}

@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MinLength,
+} from 'class-validator';
 
 export class RegisterDto {
   @ApiProperty({ example: 'John', description: 'Foydalanuvchi ismi' })
@@ -29,5 +35,7 @@ export class RegisterDto {
   })
   @IsNotEmpty()
   confirmPassword: string;
+  @IsOptional()
+  @IsString()
   jobTitle?: string;
 }

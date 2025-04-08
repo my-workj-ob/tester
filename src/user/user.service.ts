@@ -39,7 +39,30 @@ export class UserService {
       );
     }
   }
+  async findOne(id: number): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    return user;
+  }
 
+  async incrementProfileViews(userId: number): Promise<void> {
+    console.log(userId);
+
+    const user = await this.findOne(userId);
+    if (user) {
+      user.profileViews += 1;
+      console.log(
+        `Profil ko'rishlari oshirildi. User ID: ${userId}, Yangi ko'rishlar soni: ${user.profileViews}`,
+      );
+      await this.userRepository.save(user);
+    } else {
+      console.log(
+        `Foydalanuvchi ${userId} topilmadi, profil ko'rishlari oshirilmadi.`,
+      );
+    }
+  }
   // ✅ Email bo‘yicha foydalanuvchi izlash
   async findByEmail(email: string): Promise<User | null> {
     try {

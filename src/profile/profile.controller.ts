@@ -25,6 +25,7 @@ import {
 } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { UserService } from 'src/user/user.service';
 import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
 import { UploadService } from './../file/uploadService';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -41,12 +42,17 @@ export class ProfileController {
   constructor(
     private readonly uploadService: UploadService, // Inject the UploadService
     private readonly profileService: ProfileService,
+    private readonly userService: UserService,
   ) {}
 
   @UseGuards(JwtAuthGuard)
   @Get()
-  async getProfile(@Request() req) {
-    return this.profileService.getProfile(req.user?.userId);
+  async getMyProfile(@Request() req) {
+    const userId = req.user?.userId as number; // Passport joriy foydalanuvchi ma'lumotlarini `req.user`ga qo'yadi
+    if (!userId) {
+      throw new NotFoundException('Foydalanuvchi IDsi topilmadi');
+    }
+    return this.profileService.getProfile(userId);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -84,6 +90,35 @@ export class ProfileController {
   @ApiOperation({ summary: 'Ko‘nikmani o‘chirish' })
   removeSkill(@Param('skillId') skillId: number) {
     return this.profileService.removeSkill(skillId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id')
+  async getProfileById(@Param('id') id: number, @Req() req) {
+    const profileId = parseInt(String(id), 10);
+    const currentUser = req.user?.userId as number; // Joriy foydalanuvchi IDsi
+    console.log(currentUser, id);
+
+    if (isNaN(profileId)) {
+      throw new NotFoundException('Noto‘g‘ri profil IDsi');
+    }
+
+    const userProfile = await this.userService.findOne(profileId);
+
+    if (!userProfile) {
+      throw new NotFoundException(`Profil ${profileId} topilmadi`);
+    }
+
+    // Agar ko'rilayotgan profil joriy foydalanuvchining profili bo'lmasa,
+    // profil ko'rishlari sonini oshirish
+
+    if (currentUser && userProfile.id !== currentUser) {
+      console.log('asdasdasdasdasdasda', userProfile);
+
+      await this.userService.incrementProfileViews(profileId);
+    }
+
+    return this.profileService.getProfile(id); // Parametrdan kelgan `id` stringligicha ishlatiladi
   }
 
   @UseGuards(JwtAuthGuard)
