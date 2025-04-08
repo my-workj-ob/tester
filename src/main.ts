@@ -10,7 +10,6 @@ import express from 'express';
 
 import { join } from 'path';
 
-import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -26,16 +25,6 @@ async function bootstrap() {
   );
 
   app.useWebSocketAdapter(new IoAdapter(app));
-
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-      transformOptions: { enableImplicitConversion: true }, // Qo'shing yoki tekshiring
-      skipMissingProperties: true,
-    }),
-  );
 
   const config = new DocumentBuilder()
 
