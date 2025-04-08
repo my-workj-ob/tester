@@ -8,6 +8,7 @@ import {
   IsUrl,
   ValidateNested,
 } from 'class-validator';
+
 class ImageDto {
   @ApiProperty({ description: 'Image URL' })
   @IsString()
@@ -64,7 +65,9 @@ export class CreatePortfolioDto {
   imageUrl: string;
 
   @ApiProperty({ example: 1, description: 'Foydalanuvchi ID raqami' })
-  userId: number; // 🟢 userId qo‘shildi! @ApiProperty({ description: 'Is this project owned by the user?', default: true })
+  userId: number;
+
+  @ApiProperty({ example: true, description: 'Own project' })
   @IsBoolean()
   ownProject: boolean;
 
@@ -78,6 +81,7 @@ export class CreatePortfolioDto {
   @ValidateNested({ each: true })
   @Type(() => ImageDto)
   images: ImageDto[];
+
   @ApiProperty({
     example: '0',
     description: 'categoryId',
@@ -123,12 +127,8 @@ export class UpdatePortfolioDto {
   imageUrl?: string;
 
   @ApiProperty({
-    example: 'https://example.com/my-portfolio.jpg',
-    description: 'Portfolio rasmi uchun URL',
-  })
-  @ApiProperty({
-    example: '0',
-    description: 'userId',
+    example: 1,
+    description: 'User ID of the owner of the portfolio',
   })
   userId: number;
 }

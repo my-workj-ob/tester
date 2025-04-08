@@ -33,6 +33,7 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
       transform: true,
       transformOptions: { enableImplicitConversion: true }, // Qo'shing yoki tekshiring
+      skipMissingProperties: true,
     }),
   );
 
