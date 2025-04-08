@@ -21,7 +21,6 @@ async function bootstrap() {
   app.use(
     cors({
       origin: ['https://it-experts-nine.vercel.app', 'http://localhost:3000'],
-
       credentials: true,
     }),
   );
