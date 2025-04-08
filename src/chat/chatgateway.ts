@@ -18,7 +18,7 @@ import { Message } from './entities/chat.entity';
 
 @WebSocketGateway({
   cors: {
-    origin: '*',
+    origin: 'https://it-experts-nine.vercel.app',
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
