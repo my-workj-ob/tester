@@ -17,6 +17,8 @@ import { NotificationService } from './notification.service';
   cors: {
     origin: ['https://tester-nu-two.vercel.app'],
     credentials: true,
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   },
   namespace: '/notifications',
   transports: ['websocket', 'polling'],
