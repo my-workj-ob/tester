@@ -25,9 +25,9 @@ import {
 } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-import { UserService } from 'src/user/user.service';
 import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
 import { UploadService } from './../file/uploadService';
+import { UserService } from './../user/user.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { SkillDto } from './dto/skill.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
@@ -97,7 +97,6 @@ export class ProfileController {
   async getProfileById(@Param('id') id: number, @Req() req) {
     const profileId = parseInt(String(id), 10);
     const currentUser = req.user?.userId as number; // Joriy foydalanuvchi IDsi
-    console.log(currentUser, id);
 
     if (isNaN(profileId)) {
       throw new NotFoundException('Noto‘g‘ri profil IDsi');
@@ -113,8 +112,6 @@ export class ProfileController {
     // profil ko'rishlari sonini oshirish
 
     if (currentUser && userProfile.id !== currentUser) {
-      console.log('asdasdasdasdasdasda', userProfile);
-
       await this.userService.incrementProfileViews(profileId);
     }
 

@@ -80,14 +80,11 @@ export class AssessmentResultService {
       const evaluatedSubmissions =
         createAssessmentResultDto.codingSubmissions.map(
           async (submissionDto) => {
-            console.log('Yaratish uchun kelgan DTO:', submissionDto);
             const submission = await this.codingSubmissionService.create({
               userId: createAssessmentResultDto.userId,
               assessmentId: createAssessmentResultDto.assessmentId,
               code: submissionDto.code,
             });
-
-            console.log('Yaratilgan submission:', submission);
 
             const passed = true; // To'g'ri kodlashni tekshirish lozim
             const updateDto = {
@@ -96,13 +93,10 @@ export class AssessmentResultService {
                 : SubmissionStatus.FAILED,
               result: "Natija bu yerda bo'ladi",
             };
-            console.log('Yangilash DTO:', updateDto);
-            console.log('Yangilanayotgan submission ID:', submission.id);
             await this.codingSubmissionService.update(submission.id, updateDto);
 
             const updatedSubmission =
               await this.codingSubmissionService.findOne(submission.id);
-            console.log('Yangilangan submission:', updatedSubmission);
 
             return { ...submission, passed };
           },

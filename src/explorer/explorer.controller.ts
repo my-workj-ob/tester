@@ -6,7 +6,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
 import { ExploreUserWithSkillsDto } from './dto/explore-users-with-skill.dto';
 import { ExploreService } from './explorer.service';
 

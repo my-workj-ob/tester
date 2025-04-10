@@ -45,6 +45,8 @@ export class ChatController {
     const receiver = await this.userRepository.findOne({
       where: { id: body.receiverId },
     });
+    console.log('sender21: ', sender);
+    console.log('receiver12: ', receiver);
 
     if (!sender || !receiver) {
       throw new Error('Sender or receiver not found');
@@ -57,6 +59,8 @@ export class ChatController {
       isRead: false,
       timestamp: new Date(),
     });
+
+    console.log(chatMessage);
 
     const savedMessage = await this.chatRepository.save(chatMessage);
 
@@ -90,8 +94,6 @@ export class ChatController {
     @Param('userId', ParseIntPipe) userId: number,
     @Param('receiverId', ParseIntPipe) receiverId: number,
   ) {
-    console.log('Fetching chat history for:', { userId, receiverId });
-
     const chatHistory = await this.chatRepository.find({
       where: [
         { sender: { id: userId }, receiver: { id: receiverId } },
@@ -100,8 +102,6 @@ export class ChatController {
       relations: ['sender', 'receiver'],
       order: { timestamp: 'ASC' },
     });
-
-    console.log('Chat history:', chatHistory);
 
     return { success: true, chatHistory };
   }

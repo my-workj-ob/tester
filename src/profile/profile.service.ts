@@ -90,7 +90,7 @@ export class ProfileService {
     try {
       const profile = await this.profileRepository.findOne({
         where: { id: userId },
-        relations: ['user', 'skills'], // Profilga bog‘langan user ma’lumotlarini yuklash
+        relations: ['user', 'skills', 'notification'], // Profilga bog‘langan user ma’lumotlarini yuklash
       });
 
       if (!profile) {

@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-// chat.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './.../../../user/entities/user.entity';
+import { NotificationGateway } from './../notification/notificationGateway';
 import { Message } from './entities/chat.entity';
 
 @Injectable()
@@ -13,6 +13,7 @@ export class ChatService {
   constructor(
     @InjectRepository(Message) private chatRepository: Repository<Message>,
     @InjectRepository(User) private userRepository: Repository<User>,
+    private readonly notificationGateway: NotificationGateway,
   ) {}
 
   async sendMessage(
@@ -39,29 +40,31 @@ export class ChatService {
 
     // Yangi message yaratish
     const message = this.chatRepository.create({
-      sender, // sender objektini qo'shish
-      receiver, // receiver objektini qo'shish
-      message: body.message, // body.message ni text sifatida saqlash
-      timestamp: new Date(), // Xabar yuborilgan vaqtni olish
+      sender,
+      receiver,
+      message: body.message,
+      timestamp: new Date(),
     });
 
     // Ma'lumotlar bazasiga xabarni saqlash
     try {
       await this.chatRepository.save(message);
+
+      // Bildirishnoma yuborish
+
+      // Yuborilgan xabarni qaytarish
+      const messageData = {
+        senderId: sender.id,
+        receiverId: receiver.id,
+        message: body.message,
+        timestamp: message.timestamp.toISOString(),
+      };
+
+      return { success: true, message: messageData };
     } catch (error) {
       console.error('Error saving message to DB:', error);
       throw new Error('Error saving message');
     }
-
-    // Yuborilgan xabarni qaytarish
-    const messageData = {
-      senderId: sender.id,
-      receiverId: receiver.id,
-      message: body.message,
-      timestamp: message.timestamp.toISOString(),
-    };
-
-    return { success: true, message: messageData };
   }
 
   async incrementUnreadCount(receiverId: number) {
@@ -69,7 +72,7 @@ export class ChatService {
       .createQueryBuilder()
       .update(Message)
       .set({
-        unreadCount: () => 'unreadCount + 1', // Increment unread count
+        unreadCount: () => 'unreadCount + 1',
       })
       .where('receiverId = :receiverId AND isRead = false', { receiverId })
       .execute();
@@ -80,7 +83,7 @@ export class ChatService {
       .createQueryBuilder()
       .update(Message)
       .set({
-        unreadCount: () => 'unreadCount - 1', // Decrement unread count
+        unreadCount: () => 'unreadCount - 1',
       })
       .where('receiverId = :receiverId AND isRead = false', { receiverId })
       .execute();
@@ -93,7 +96,6 @@ export class ChatService {
     );
 
     if (result.affected) {
-      // Decrement unread count for receiver after marking as read
       this.decrementUnreadCount(receiverId);
     }
   }

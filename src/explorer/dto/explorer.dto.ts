@@ -12,4 +12,7 @@ export class ExploreUserResponseDto {
 
   @ApiProperty({ example: 72 })
   matchPercentage: number;
+
+  @ApiProperty({ example: 'pending' })
+  status: string[];
 }

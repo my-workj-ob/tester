@@ -40,7 +40,6 @@ export class MentorService {
       const user = await this.userRepository.findOne({
         where: { id: userId },
       });
-      console.log(user);
 
       if (!user) {
         throw new NotFoundException('User not found');

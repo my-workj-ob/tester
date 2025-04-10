@@ -11,16 +11,17 @@ import { RefreshToken } from './../../auth/entities/refresh-token.entity';
 import { Project } from './../../portfolio/entities/project.entity';
 import { Profile } from './../../profile/entities/profile.entity';
 
-import { Connection } from 'src/connection/entity/connection.entity';
 import { Session } from '../../security/entities/session.entity';
 import { AssessmentResult } from './../../assessment-result/entities/assements-result.entity';
 import { Message } from './../../chat/entities/chat.entity';
 import { CodingSubmission } from './../../coding-submission/entities/coding-submission.entity';
 import { Comment } from './../../comments/entities/comments.entity';
+import { Connection } from './../../connection/entity/connection.entity';
 import { Job } from './../../jobs/entity/jobs.entity';
 import { Like } from './../../like/entities/like.entity';
 import { Mentor } from './../../mentors/entities/mentor.entity';
 import { MentorshipRequest } from './../../mentors/entities/mentorship-request.entity';
+import { Notification } from './../../notification/entities/notification.entity';
 import { Skill } from './../../skill/entities/skill.entity';
 import { ProfileStat } from './profile-stat.entity';
 
@@ -96,6 +97,8 @@ export class User {
 
   @OneToMany(() => Connection, (connection) => connection.requester)
   sentConnections: Connection[];
+  @OneToMany(() => Notification, (connection) => connection.user)
+  notifications: Notification[];
   @Column({ default: 0 }) // Qo'shilgan ustun
   profileViews: number;
 

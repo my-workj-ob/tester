@@ -13,17 +13,18 @@ import {
 } from '@nestjs/websockets';
 import type { Server, Socket } from 'socket.io';
 import type { Repository } from 'typeorm';
+import { NotificationGateway } from './../notification/notificationGateway';
 import { User } from './../user/entities/user.entity';
 import { Message } from './entities/chat.entity';
 //
 @WebSocketGateway({
   cors: {
-    origin: ['http://localhost:3030', 'https://tester-ajuz.onrender.com'],
+    origin: ['http://localhost:3030'],
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   },
-  namespace: '/',
+  namespace: '/chat',
   transports: ['websocket', 'polling'],
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -38,6 +39,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly chatRepository: Repository<Message>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly notificationGateway: NotificationGateway,
   ) {}
 
   // Handle new connections
@@ -150,6 +152,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         isRead: savedMessage.isRead,
         timestamp: savedMessage.timestamp.toISOString(),
       };
+
+      const newMessagePus = await this.notificationGateway.pushAndSave(
+        body.receiverId,
+        'MESSAGE',
+        `Sizga yangi xabar keldi: ${body.message}`,
+      );
+      console.log('newMessagePus: ', newMessagePus);
 
       console.log(
         'Emitting message to rooms:',

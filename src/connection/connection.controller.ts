@@ -17,7 +17,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
 import { ConnectionService } from './connection.service';
 import { CreateConnectionRequestDto } from './dto/connection.dto';
 import { Connection } from './entity/connection.entity';

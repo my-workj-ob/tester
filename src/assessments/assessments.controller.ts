@@ -77,12 +77,9 @@ export class AssessmentController {
     type: [Assessment],
   })
   async getAvailableAssessments(@Req() req): Promise<Assessment[]> {
-    console.log('req.user:', req.user); // Qo'shish
     const userId = req.user?.userId; // Taxminiy maydon nomi
-    console.log('userId raw:', userId); // Qo'shish
 
     const numericUserId = Number(userId);
-    console.log('userId numeric:', numericUserId); // Qo'shish
 
     if (isNaN(numericUserId)) {
       console.error("Noto'g'ri foydalanuvchi IDsi:", userId);

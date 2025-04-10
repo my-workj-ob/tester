@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Comment } from './../../comments/entities/comments.entity';
+import { Notification } from './../../notification/entities/notification.entity';
 import { Project } from './../../portfolio/entities/project.entity';
 import { Skill } from './../../skill/entities/skill.entity';
 import { User } from './../../user/entities/user.entity';
@@ -48,4 +49,7 @@ export class Profile {
 
   @OneToMany(() => Comment, (comment) => comment.profile, { cascade: true })
   comments: Comment[];
+
+  @OneToMany(() => Notification, (notification) => notification.profile)
+  notification: Notification[];
 }

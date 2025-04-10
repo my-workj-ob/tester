@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ConnectionService } from 'src/connection/connection.service';
-import { User } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
+import { ConnectionService } from './../connection/connection.service';
+import { User } from './../user/entities/user.entity';
 import { ExploreUserWithSkillsDto } from './dto/explore-users-with-skill.dto';
 
 @Injectable()
@@ -41,7 +41,6 @@ export class ExploreService {
   async getExploreUsers(
     currentUserId: number,
   ): Promise<ExploreUserWithSkillsDto[]> {
-    // Qaytarish tipi o'zgartirildi
     const currentUser = await this.userRepository.findOne({
       where: { id: currentUserId },
       relations: ['skills', 'profile'],
@@ -52,36 +51,58 @@ export class ExploreService {
     }
 
     const allUsers = await this.userRepository.find({
-      relations: ['skills', 'profile'],
+      relations: [
+        'skills',
+        'profile',
+        'receivedConnections',
+        'sentConnections',
+      ],
     });
 
-    const connections =
-      await this.connectionService.getUserConnections(currentUserId);
-    const connectedUserIds = connections.map((conn) =>
-      conn.requesterId === currentUserId ? conn.receiverId : conn.requesterId,
-    );
+    // const connections =
+    //   await this.connectionService.getUserConnections(currentUserId);
+    // const connectedUserIds = connections.map((conn) =>
+    //   conn.requesterId === currentUserId ? conn.receiverId : conn.requesterId,
+    // );
 
-    const exploreUsers: ExploreUserWithSkillsDto[] = []; // Javob massivi tipi o'zgartirildi
+    const exploreUsers: ExploreUserWithSkillsDto[] = [];
 
     for (const otherUser of allUsers) {
-      if (
-        otherUser.id !== currentUserId &&
-        !connectedUserIds.includes(otherUser.id)
-      ) {
+      if (otherUser.id !== currentUserId) {
         const matchPercentage = this.calculateMatchPercentage(
           currentUser.skills.map((s) => s.name),
           otherUser.skills.map((s) => s.name),
         );
 
+        let connectionStatus: string | null = null;
+
+        // Joriy foydalanuvchi bilan aloqa statusini tekshirish (kiruvchi so'rovlar)
+        const receivedConnection = otherUser.receivedConnections.find(
+          (conn) => conn.requesterId === currentUserId,
+        );
+        if (receivedConnection) {
+          connectionStatus = receivedConnection.status;
+        }
+
+        // Joriy foydalanuvchi bilan aloqa statusini tekshirish (chiquvchi so'rovlar)
+        const sentConnection = otherUser.sentConnections.find(
+          (conn) => conn.receiverId === currentUserId,
+        );
+        if (sentConnection) {
+          connectionStatus = sentConnection.status;
+        }
+
         exploreUsers.push({
           id: otherUser.id,
-          name: otherUser.profile.firstName,
+          firstName: otherUser.profile.firstName,
+          profile: otherUser.profile,
+          status: connectionStatus ? connectionStatus : 'connect',
           skills: otherUser.skills.map((s) => s.name),
+
           matchPercentage,
         });
       }
     }
-    console.log(allUsers);
 
     return exploreUsers.sort((a, b) => b.matchPercentage - a.matchPercentage);
   }

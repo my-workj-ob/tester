@@ -48,14 +48,9 @@ export class UserService {
   }
 
   async incrementProfileViews(userId: number): Promise<void> {
-    console.log(userId);
-
     const user = await this.findOne(userId);
     if (user) {
       user.profileViews += 1;
-      console.log(
-        `Profil ko'rishlari oshirildi. User ID: ${userId}, Yangi ko'rishlar soni: ${user.profileViews}`,
-      );
       await this.userRepository.save(user);
     } else {
       console.log(

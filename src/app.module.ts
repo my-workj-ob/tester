@@ -27,6 +27,7 @@ import { LikeController } from './like/like.controller';
 import { LikeModule } from './like/like.module';
 import { Mentor } from './mentors/entities/mentor.entity';
 import { MentorsModule } from './mentors/mentors.module';
+import { NotificationModule } from './notification/notification.module';
 import { Project } from './portfolio/entities/project.entity';
 import { ProjectController } from './portfolio/portfolio.controller';
 import { PortfolioModule } from './portfolio/portfolio.module';
@@ -59,7 +60,7 @@ import { UserService } from './user/user.service';
       url: process.env.DATABASE_URL,
       autoLoadEntities: true,
       synchronize: true, // ❗ Production uchun false qo‘ying
-      logging: true,
+      logging: false,
       entities: [
         User,
         RefreshToken,
@@ -93,6 +94,7 @@ import { UserService } from './user/user.service';
     JobsModule,
     ConnectionModule,
     ExplorerModule,
+    NotificationModule,
   ],
   controllers: [
     AppController,

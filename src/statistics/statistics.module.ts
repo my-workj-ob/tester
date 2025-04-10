@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Connection } from 'src/connection/entity/connection.entity';
+import { Connection } from './../connection/entity/connection.entity';
 import { Project } from './../portfolio/entities/project.entity';
 import { User } from './../user/entities/user.entity';
 import { Rating } from './entities/rating.entity';

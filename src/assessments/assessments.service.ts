@@ -28,7 +28,6 @@ export class AssessmentService {
   async create(createAssessmentDto: CreateAssessmentDto): Promise<Assessment> {
     const { skillId, ...assessmentData } = createAssessmentDto;
     const skill = await this.skillService.findOne(skillId);
-    console.log(skill);
     if (!skill) {
       throw new BadRequestException(`Ko'nikma ${skillId} topilmadi`);
     }
@@ -58,11 +57,8 @@ export class AssessmentService {
   }
 
   async findAvailable(userId: number): Promise<Assessment[]> {
-    console.log(userId);
-
     // Foydalanuvchi ID ni tekshirish
     if (isNaN(userId) || userId <= 0) {
-      console.error("Noto'g'ri foydalanuvchi IDsi:", userId);
       throw new UnauthorizedException(
         "Foydalanuvchi IDsi topilmadi yoki noto'g'ri formatda.",
       );
@@ -70,7 +66,6 @@ export class AssessmentService {
 
     // 1. Barcha baholashlarni olish
     const allAssessments = await this.assessmentRepository.find();
-    console.log('allAssessments:', allAssessments);
 
     // 2. Foydalanuvchi tomonidan tugallangan baholashlar ro'yxatini olish
     const completedAssessments =
