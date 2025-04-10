@@ -15,7 +15,7 @@ import { NotificationService } from './notification.service';
 
 @WebSocketGateway({
   cors: {
-    origin: ['http://localhost:3030', 'https://tester-nu-two.vercel.app'],
+    origin: ['https://tester-nu-two.vercel.app'],
     credentials: true,
   },
   namespace: '/notifications',
