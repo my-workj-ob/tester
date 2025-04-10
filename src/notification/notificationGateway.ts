@@ -15,7 +15,7 @@ import { NotificationService } from './notification.service';
 
 @WebSocketGateway({
   cors: {
-    origin: ['https://tester-nu-two.vercel.app'],
+    origin: ['https://tester-ajuz.onrender.com'],
     credentials: true,
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization'],

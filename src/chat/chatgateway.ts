@@ -19,7 +19,7 @@ import { Message } from './entities/chat.entity';
 //
 @WebSocketGateway({
   cors: {
-    origin: ['https://tester-nu-two.vercel.app'],
+    origin: ['https://tester-ajuz.onrender.com'],
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
