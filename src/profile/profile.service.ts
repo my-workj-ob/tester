@@ -96,8 +96,11 @@ export class ProfileService {
       if (!profile) {
         throw new NotFoundException('Profile not found');
       }
-
-      return profile;
+      const connections = profile.user.sentConnections;
+      return {
+        ...profile,
+        ...connections,
+      };
     } catch (error) {
       throw new Error(`Error getting profile: ${error}`);
     }

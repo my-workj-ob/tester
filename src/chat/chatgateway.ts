@@ -15,11 +15,12 @@ import type { Server, Socket } from 'socket.io';
 import type { Repository } from 'typeorm';
 import { NotificationGateway } from './../notification/notificationGateway';
 import { User } from './../user/entities/user.entity';
+import { ChatService } from './chat.service';
 import { Message } from './entities/chat.entity';
 //
 @WebSocketGateway({
   cors: {
-    origin: ['https://tester-ajuz.onrender.com'],
+    origin: ['http://localhost:3030', 'https://tester-ajuz.onrender.com'],
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
@@ -40,6 +41,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly notificationGateway: NotificationGateway,
+    private readonly chatService: ChatService,
   ) {}
 
   // Handle new connections
@@ -60,8 +62,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       // Broadcast that user is offline
       this.server.emit('userOffline', userId);
-
-      console.log(`User ${userId} is now offline`);
     }
   }
 
@@ -70,8 +70,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() userId: number,
     @ConnectedSocket() client: Socket,
   ) {
-    console.log(`User ${userId} joining chat with socket ${client.id}`);
-
     // Join user's room for private messages
     client.join(`user-${userId}`);
 
@@ -82,7 +80,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.server.emit('userOnline', userId);
 
     // Log all connected users
-    console.log('Connected users:', Array.from(this.connectedUsers.entries()));
 
     return { success: true, message: `Joined chat as user ${userId}` };
   }
@@ -95,7 +92,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // Send the list to the requesting client
     client.emit('onlineUsers', onlineUserIds);
 
-    console.log('Sent online users list:', onlineUserIds);
     return onlineUserIds;
   }
 
@@ -106,7 +102,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
   ) {
     const { senderId, receiverId, message } = body;
-    console.log('Received message:', body);
 
     if (!message || message.trim() === '') {
       return { success: false, message: 'Message cannot be empty' };
@@ -119,6 +114,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const receiver = await this.userRepository.findOne({
         where: { id: receiverId },
       });
+
+      await this.chatService.saveConversation(receiverId, senderId);
 
       if (!sender || !receiver) {
         console.error('Sender or receiver not found:', {
@@ -153,17 +150,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         timestamp: savedMessage.timestamp.toISOString(),
       };
 
-      const newMessagePus = await this.notificationGateway.pushAndSave(
+      await this.notificationGateway.pushAndSave(
         body.receiverId,
         'MESSAGE',
         `Sizga yangi xabar keldi: ${body.message}`,
-      );
-      console.log('newMessagePus: ', newMessagePus);
-
-      console.log(
-        'Emitting message to rooms:',
-        `user-${receiverId}`,
-        `user-${senderId}`,
       );
 
       // Socket.io orqali xabarni yetkazish
@@ -183,8 +173,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
   ) {
     const { senderId, receiverId } = data;
-
-    console.log('Marking messages as read:', data);
 
     try {
       // Обновить сообщения в базе данных
@@ -217,8 +205,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() userId: number,
     @ConnectedSocket() client: Socket,
   ) {
-    console.log('Getting unread counts for user:', userId);
-
     try {
       // Получить количество непрочитанных сообщений для каждого отправителя
       const unreadCounts = await this.chatRepository
@@ -230,15 +216,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         .groupBy('message.sender.id')
         .getRawMany();
 
-      console.log('Unread counts:', unreadCounts);
-
       // Отправить результат клиенту
       client.emit('unreadCounts', unreadCounts);
 
       return unreadCounts;
     } catch (error) {
-      console.error('Error getting unread counts:', error);
       return { success: false, error: error.message };
     }
+  }
+
+  @SubscribeMessage('typing')
+  handleTyping(
+    @MessageBody() data: { senderId: number; receiverId: number },
+    @ConnectedSocket() client: Socket,
+  ) {
+    const { senderId, receiverId } = data;
+    this.server.to(`user-${receiverId}`).emit('userTyping', { senderId });
   }
 }

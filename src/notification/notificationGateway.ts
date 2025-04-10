@@ -15,7 +15,7 @@ import { NotificationService } from './notification.service';
 
 @WebSocketGateway({
   cors: {
-    origin: ['https://tester-ajuz.onrender.com'],
+    origin: ['http://localhost:3030', 'https://tester-ajuz.onrender.com'],
     credentials: true,
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -53,8 +53,6 @@ export class NotificationGateway
       client.data.userId = userId; // socketda saqlab qo‘yamiz
       client.join(`user-${userId}`);
       this.userSockets.set(userId, client);
-
-      console.log(`[SOCKET] User connected: ${userId}`);
     } catch (error) {
       console.error('[SOCKET] Token verification failed:', error);
       client.disconnect();
@@ -65,7 +63,6 @@ export class NotificationGateway
     const userId = client.data?.userId;
     if (userId) {
       this.userSockets.delete(userId);
-      console.log(`[SOCKET] User disconnected: ${userId}`);
     }
   }
 

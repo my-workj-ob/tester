@@ -9,10 +9,11 @@ import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
 import { ChatGateway } from './chatgateway';
 import { Message } from './entities/chat.entity';
+import { Conversation } from './entities/save-chat-user.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Message, Notification]),
+    TypeOrmModule.forFeature([User, Message, Notification, Conversation]),
     NotificationModule,
   ],
   providers: [ChatService, ChatGateway, UserService, NotificationService],

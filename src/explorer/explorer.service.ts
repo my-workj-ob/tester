@@ -88,6 +88,8 @@ export class ExploreService {
         const sentConnection = otherUser.sentConnections.find(
           (conn) => conn.receiverId === currentUserId,
         );
+        console.log(otherUser.receivedConnections);
+
         if (sentConnection) {
           connectionStatus = sentConnection.status;
         }
@@ -98,8 +100,8 @@ export class ExploreService {
           profile: otherUser.profile,
           status: connectionStatus ? connectionStatus : 'connect',
           skills: otherUser.skills.map((s) => s.name),
-
           matchPercentage,
+          ...otherUser.sentConnections,
         });
       }
     }

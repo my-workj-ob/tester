@@ -25,11 +25,6 @@ export class NotificationService {
     message: string,
     relatedId?: number,
   ) {
-    console.log(userId);
-
-    console.log(
-      `[NotificationService] Bildirishnoma yaratishga urinish: Foydalanuvchi ID: ${userId}, Turi: ${type}, Xabar: ${message}, Aloqador ID: ${relatedId}`,
-    );
     try {
       const notification = this.notificationRepo.create({
         userId,
@@ -38,9 +33,7 @@ export class NotificationService {
         relatedId,
       });
       const savedNotification = await this.notificationRepo.save(notification);
-      console.log(
-        `[NotificationService] Bildirishnoma yaratildi. ID: ${savedNotification.id}`,
-      );
+
       return savedNotification;
     } catch (error) {
       console.error(
@@ -57,10 +50,6 @@ export class NotificationService {
         where: { userId, isRead: false },
       });
 
-      console.log(
-        `[NotificationService] O'qilmagan bildirishnomalar soni (Foydalanuvchi ID: ${userId}): ${count}`,
-      );
-
       return count;
     } catch (error) {
       console.error(
@@ -74,14 +63,8 @@ export class NotificationService {
   }
 
   async markAsRead(notificationId: number) {
-    console.log(
-      `[NotificationService] Bildirishnoma o'qilgan deb belgilash. ID: ${notificationId}`,
-    );
     try {
       await this.notificationRepo.update(notificationId, { isRead: true });
-      console.log(
-        `[NotificationService] Bildirishnoma ${notificationId} o'qilgan deb belgilandi.`,
-      );
     } catch (error) {
       console.error(
         `[NotificationService] Bildirishnomani o'qilgan deb belgilashda xatolik (ID: ${notificationId}):`,
@@ -92,16 +75,10 @@ export class NotificationService {
   }
 
   async markAllAsRead(userId: number) {
-    console.log(
-      `[NotificationService] Barcha bildirishnomalarni o'qilgan deb belgilash. Foydalanuvchi ID: ${userId}`,
-    );
     try {
-      const updateResult = await this.notificationRepo.update(
+      await this.notificationRepo.update(
         { userId, isRead: false },
         { isRead: true },
-      );
-      console.log(
-        `[NotificationService] ${updateResult.affected} ta bildirishnoma o'qilgan deb belgilandi (Foydalanuvchi ID: ${userId}).`,
       );
     } catch (error) {
       console.error(
@@ -113,17 +90,12 @@ export class NotificationService {
   }
 
   async getUserNotifications(userId: number) {
-    console.log(
-      `[NotificationService] Foydalanuvchi bildirishnomalarini olish. Foydalanuvchi ID: ${userId}`,
-    );
     try {
       const notifications = await this.notificationRepo.find({
         where: { userId },
         order: { createdAt: 'DESC' },
       });
-      console.log(
-        `[NotificationService] ${notifications.length} ta bildirishnoma topildi (Foydalanuvchi ID: ${userId}).`,
-      );
+
       return notifications;
     } catch (error) {
       console.error(

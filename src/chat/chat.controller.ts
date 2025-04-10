@@ -52,6 +52,8 @@ export class ChatController {
       throw new Error('Sender or receiver not found');
     }
 
+    await this.chatService.saveConversation(sender.id, body.receiverId);
+
     const chatMessage = this.chatRepository.create({
       sender,
       receiver,
@@ -59,8 +61,6 @@ export class ChatController {
       isRead: false,
       timestamp: new Date(),
     });
-
-    console.log(chatMessage);
 
     const savedMessage = await this.chatRepository.save(chatMessage);
 
@@ -89,6 +89,12 @@ export class ChatController {
 
     return { success: true, message: messageData };
   }
+
+  @Get('conversations/:userId')
+  async getConversations(@Param('userId') userId: number) {
+    return this.chatService.getConversations(userId);
+  }
+
   @Get('history/:userId/:receiverId')
   async getChatWithUser(
     @Param('userId', ParseIntPipe) userId: number,
