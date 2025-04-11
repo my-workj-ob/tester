@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   BadRequestException,
@@ -7,8 +8,10 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
+import { Message } from './../chat/entities/chat.entity';
+import { ConnectionService } from './../connection/connection.service';
+import { Connection } from './../connection/entity/connection.entity';
 import { Skill } from './../skill/entities/skill.entity';
-import { ProfileStat } from './../user/entities/profile-stat.entity';
 import { User } from './../user/entities/user.entity';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { SkillDto } from './dto/skill.dto';
@@ -29,8 +32,12 @@ export class ProfileService {
     @InjectRepository(User) // User uchun inject qilish kerak
     private readonly userRepository: Repository<User>,
 
-    @InjectRepository(ProfileStat)
-    private profileStatRepository: Repository<ProfileStat>,
+    @InjectRepository(Message)
+    private readonly messageRepository: Repository<Message>,
+
+    @InjectRepository(Connection)
+    private connectionRepository: Repository<Connection>,
+    private connectionService: ConnectionService,
   ) {}
 
   async updateNotifications(userId: number, dto: UpdateNotificationDto) {
@@ -106,6 +113,169 @@ export class ProfileService {
     }
   }
 
+  async getRecentActivityForUser(
+    userId: number,
+    limit: number = 5,
+  ): Promise<any[]> {
+    const connections = await this.connectionRepository.find({
+      where: [
+        { requester: { id: userId }, status: 'accepted' },
+        { receiver: { id: userId }, status: 'accepted' },
+      ],
+      order: { updatedAt: 'DESC' },
+      relations: [
+        'requester',
+        'receiver',
+        'requester.profile',
+        'receiver.profile',
+      ],
+      take: limit,
+    });
+    const messages = await this.messageRepository.find({
+      where: { receiver: { id: userId } },
+      order: { timestamp: 'DESC' },
+      relations: ['sender', 'sender.profile'],
+    });
+
+    const now = new Date();
+    const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+    const messageMap = new Map<
+      number,
+      {
+        message: any;
+        newCount: number;
+        oldCount: number;
+      }
+    >();
+
+    for (const msg of messages) {
+      const senderId = msg.sender.id;
+      const isNew = msg.timestamp > oneDayAgo;
+
+      if (!messageMap.has(senderId)) {
+        // Birinchi xabar — oxirgi deb belgilaymiz
+        messageMap.set(senderId, {
+          message: msg,
+          newCount: isNew ? 1 : 0,
+          oldCount: isNew ? 0 : 1,
+        });
+      } else {
+        const entry = messageMap.get(senderId)!;
+        if (isNew) {
+          entry.newCount += 1;
+        } else {
+          entry.oldCount += 1;
+        }
+      }
+    }
+
+    const messageActivities = Array.from(messageMap.values()).map(
+      ({ message, newCount, oldCount }) => {
+        const userName =
+          message.sender.profile?.firstName || message.sender.email;
+
+        let text = `${userName} sent you a message`;
+
+        if (newCount > 1) {
+          text = `${userName} sent you ${newCount} new messages`;
+        }
+
+        if (oldCount > 0 && newCount === 0) {
+          text = `${userName} has ${oldCount} old messages`;
+        }
+
+        if (oldCount > 0 && newCount > 0) {
+          text += ` (+${oldCount} older)`;
+        }
+
+        return {
+          type: 'message',
+          user: message.sender,
+          date: message.timestamp,
+          text,
+          newMessagesCount: newCount,
+          oldMessagesCount: oldCount,
+        };
+      },
+    );
+
+    const connectionActivities = connections.map((conn) => {
+      const isRequester = conn.requesterId === userId;
+      const otherUser = isRequester ? conn.receiver : conn.requester;
+      const userName = otherUser.profile?.firstName || otherUser.email;
+      const text = `You connected with ${userName}`;
+      return {
+        type: 'connection',
+        user: otherUser,
+        date: conn.updatedAt,
+        text,
+      };
+    });
+    const allActivities = [...messageActivities, ...connectionActivities];
+    allActivities.sort((a, b) => {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return dateB - dateA; // Descending order
+    });
+
+    return allActivities.slice(0, limit);
+  }
+  async getProfileStats(userId: number) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: [
+        'profileStat',
+        'profile',
+        'receivedConnections',
+        'sentConnections',
+        'receivedMessages',
+      ],
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const getIncomingConnection =
+      await this.connectionService.getIncomingConnectionRequests(userId);
+    const getOutgoingConnection =
+      await this.connectionService.getOutgoingConnectionRequests(userId);
+
+    const getConnectionsMe =
+      await this.connectionService.getUserConnections(userId);
+
+    const getRecentActivities = await this.getRecentActivityForUser(userId);
+
+    console.log({
+      getIncomingConnection,
+      getOutgoingConnection,
+      getConnectionsMe,
+    });
+
+    return {
+      id: user.id,
+      connections: {
+        receivedConnections: user.sentConnections.map || 0,
+        sentConnections: user.sentConnections?.length || 0,
+        totalConnections:
+          (user.receivedConnections?.length || 0) +
+          (user.sentConnections?.length || 0),
+        getIncomingConnection: getIncomingConnection.length || 0,
+        getOutgoingConnection: getOutgoingConnection.length || 0,
+        getConnectionsMe: getConnectionsMe.length || 0,
+        getRecentActivities: getRecentActivities,
+      },
+      profileViews: {
+        profileViews: user.profileViews,
+      },
+      messages: {
+        messageCount: user.receivedMessages?.length || 0,
+        unreadCount: user.receivedMessages?.filter((message) => !message.isRead)
+          .length,
+      },
+    };
+  }
   async updateProfile(userId: number, dto: UpdateProfileDto): Promise<Profile> {
     try {
       if (!userId) {
@@ -176,30 +346,5 @@ export class ProfileService {
     } catch (error) {
       throw new Error(`Error updating avatar: ${error}`);
     }
-  }
-
-  async getProfileStats(userId: number) {
-    const user = await this.userRepository.findOne({
-      where: { id: userId },
-      relations: ['profileStat', 'user.profile'],
-    });
-
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    const profileStat = user.profileStat;
-
-    return {
-      id: user.id,
-      user: {
-        user,
-      },
-      rating: profileStat.rating,
-      content: profileStat.content,
-      date: profileStat.date,
-      likes: profileStat.likes,
-      replies: profileStat.replies,
-    };
   }
 }

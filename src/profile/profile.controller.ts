@@ -54,7 +54,22 @@ export class ProfileController {
     }
     return this.profileService.getProfile(userId);
   }
+  @UseGuards(JwtAuthGuard)
+  @Get('stats')
+  async getProfileStats(@Req() req) {
+    try {
+      const id = req.user.userId as number;
 
+      if (!id) {
+        throw new BadRequestException('User ID is required');
+      }
+      // Call the service method to get profile stats
+      return await this.profileService.getProfileStats(id);
+    } catch (error) {
+      // Handle errors (for example, user not found)
+      throw new NotFoundException(`User not found: ${error}`);
+    }
+  }
   @UseGuards(JwtAuthGuard)
   @Patch()
   @ApiOperation({ summary: 'Profilni yangilash' })
@@ -160,17 +175,5 @@ export class ProfileController {
 
     // Avatar URL-ni yangilash
     return this.profileService.updateAvatar(profileId, avatarUrl);
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get(':id/stats')
-  async getProfileStats(@Param('id') id: number) {
-    try {
-      // Call the service method to get profile stats
-      return await this.profileService.getProfileStats(id);
-    } catch (error) {
-      // Handle errors (for example, user not found)
-      throw new NotFoundException(`User not found: ${error}`);
-    }
   }
 }
