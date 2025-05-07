@@ -224,13 +224,43 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return { success: false, error: error.message };
     }
   }
-
   @SubscribeMessage('typing')
   handleTyping(
-    @MessageBody() data: { senderId: number; receiverId: number },
+    @MessageBody()
+    data: { senderId: number; receiverId: number; isTyping: boolean },
     @ConnectedSocket() client: Socket,
   ) {
-    const { senderId, receiverId } = data;
-    this.server.to(`user-${receiverId}`).emit('userTyping', { senderId });
+    const { senderId, receiverId, isTyping } = data;
+    this.server
+      .to(`user-${receiverId}`)
+      .emit('userTyping', { senderId, isTyping });
+
+    console.log('isTyping:', isTyping);
+  }
+
+  @SubscribeMessage('userBlocked')
+  handleUserBlocked(
+    @MessageBody() data: { blockerId: number; blockedId: number },
+  ) {
+    // Handle the blocking event, you can notify users or handle specific logic
+    const { blockerId, blockedId } = data;
+    console.log(`User ${blockerId} blocked user ${blockedId}`);
+    // Optionally, emit events to notify the users involved
+    this.server
+      .to(`user-${blockedId}`)
+      .emit('blocked', { blockerId, blockedId });
+  }
+
+  @SubscribeMessage('userUnblocked')
+  handleUserUnblocked(
+    @MessageBody() data: { blockerId: number; blockedId: number },
+  ) {
+    // Handle the unblocking event
+    const { blockerId, blockedId } = data;
+    console.log(`User ${blockerId} unblocked user ${blockedId}`);
+    // Optionally, emit events to notify the users involved
+    this.server
+      .to(`user-${blockedId}`)
+      .emit('unblocked', { blockerId, blockedId });
   }
 }

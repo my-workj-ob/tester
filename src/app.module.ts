@@ -10,6 +10,7 @@ import { RefreshToken } from './auth/entities/refresh-token.entity';
 import { CategoryModule } from './category/category.module';
 import { CategoryService } from './category/category.service';
 import { Category } from './category/entities/category.entity';
+import { BlockModule } from './chat/block.module';
 import { ChatController } from './chat/chat.controller';
 import { ChatModule } from './chat/chat.module';
 import { Message } from './chat/entities/chat.entity';
@@ -57,7 +58,7 @@ import { UserService } from './user/user.service';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url: process.env.DATABASE_URL,
+      url: 'postgresql://postgres:0000@localhost:5432/itexperts',
       autoLoadEntities: true,
       synchronize: true, // ❗ Production uchun false qo‘ying
       logging: false,
@@ -95,6 +96,7 @@ import { UserService } from './user/user.service';
     ConnectionModule,
     ExplorerModule,
     NotificationModule,
+    BlockModule,
   ],
   controllers: [
     AppController,

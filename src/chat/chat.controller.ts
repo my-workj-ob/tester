@@ -45,8 +45,6 @@ export class ChatController {
     const receiver = await this.userRepository.findOne({
       where: { id: body.receiverId },
     });
-    console.log('sender21: ', sender);
-    console.log('receiver12: ', receiver);
 
     if (!sender || !receiver) {
       throw new Error('Sender or receiver not found');

@@ -11,6 +11,7 @@ import { RefreshToken } from './../../auth/entities/refresh-token.entity';
 import { Project } from './../../portfolio/entities/project.entity';
 import { Profile } from './../../profile/entities/profile.entity';
 
+import { Block } from 'src/chat/entities/block-user.entity';
 import { Session } from '../../security/entities/session.entity';
 import { AssessmentResult } from './../../assessment-result/entities/assements-result.entity';
 import { Message } from './../../chat/entities/chat.entity';
@@ -101,6 +102,11 @@ export class User {
   notifications: Notification[];
   @Column({ default: 0 }) // Qo'shilgan ustun
   profileViews: number;
+  @OneToMany(() => Block, (block) => block.blocker)
+  blockedUsers: Block[];
+  // user.entity.ts
+  @Column({ nullable: true, type: 'text' })
+  publicKey: string;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' }) // Agar yo'q bo'lsa, qo'shing
   updatedAt: Date;
