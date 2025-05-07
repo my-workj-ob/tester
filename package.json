@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
-    "start": "node --max-old-space-size=4096 dist/main.js",
+    "start": "node --max-old-space-size=4096 dist/src/main.js",
     "typeorm": "typeorm-ts-node-commonjs",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start:dev": "nest start --watch",
