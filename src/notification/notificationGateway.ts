@@ -15,7 +15,7 @@ import { NotificationService } from './notification.service';
 
 @WebSocketGateway({
   cors: {
-    origin: 'https://tester-ajuz.onrender.com',
+    origin: ['http://localhost:3030', 'https://tester-ajuz.onrender.com'],
     credentials: true,
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization'],

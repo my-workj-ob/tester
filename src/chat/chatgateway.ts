@@ -20,7 +20,7 @@ import { Message } from './entities/chat.entity';
 //
 @WebSocketGateway({
   cors: {
-    origin: 'https://tester-ajuz.onrender.com',
+    origin: ['http://localhost:3030', 'https://tester-ajuz.onrender.com'],
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
