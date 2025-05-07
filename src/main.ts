@@ -10,6 +10,7 @@ import express from 'express';
 
 import { join } from 'path';
 
+import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -19,12 +20,29 @@ async function bootstrap() {
 
   app.use(
     cors({
-      origin: ['https://it-experts-nine.vercel.app', 'http://localhost:3000'],
+      origin: [
+        'https://it-experts-nine.vercel.app',
+        'http://192.168.100.26:56515',
+        'http://localhost:3000',
+        'http://localhost:3001',
+      ],
       credentials: true,
     }),
   );
 
   app.useWebSocketAdapter(new IoAdapter(app));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true, // 👉 stringlarni avtomatik number, boolean ga o‘giradi
+      whitelist: true, // DTO'da bo‘lmagan fieldlar avtomatik olib tashlanadi
+      forbidNonWhitelisted: true, // DTO'da yo‘q field bo‘lsa xato beradi
+      transformOptions: {
+        enableImplicitConversion: true, // DTO'da bo‘lmagan fieldlar avtomatik olib tashlanadi
+      },
+      skipMissingProperties: false, // DTO'da bo‘lmagan fieldlar avtomatik olib tashlanadi
+      stopAtFirstError: false, // DTO'da bo‘lmagan fieldlar avtomatik olib tashlanadi
+    }),
+  );
 
   const config = new DocumentBuilder()
 
@@ -48,7 +66,7 @@ async function bootstrap() {
     express.static(join(__dirname, '../node_modules/swagger-ui-dist')),
   );
 
-  await app.listen(process.env.PORT || 3030);
+  await app.listen(process.env.PORT || 3000);
 }
 
 bootstrap();
