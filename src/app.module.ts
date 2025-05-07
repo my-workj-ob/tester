@@ -58,10 +58,11 @@ import { UserService } from './user/user.service';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      url: 'postgresql://postgres:0000@localhost:5432/itexperts',
+      url: process.env.DATABASE_URL,
       autoLoadEntities: true,
       synchronize: true, // ❗ Production uchun false qo‘ying
       logging: false,
+      migrations: ['src/migrations/*.ts'],
       entities: [
         User,
         RefreshToken,
