@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Notification } from 'src/notification/entities/notification.entity';
-import { NotificationService } from 'src/notification/notification.service';
-import { NotificationGateway } from 'src/notification/notificationGateway';
 import { User } from '../user/entities/user.entity';
+import { Notification } from './../notification/entities/notification.entity';
+import { NotificationService } from './../notification/notification.service';
+import { NotificationGateway } from './../notification/notificationGateway';
 import { BlockController } from './block.controller';
 import { BlockService } from './block.service';
 import { ChatService } from './chat.service';
