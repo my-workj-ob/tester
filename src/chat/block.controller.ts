@@ -8,18 +8,4 @@ import { BlockService } from './block.service';
 @UseGuards(JwtAuthGuard)
 export class BlockController {
   constructor(private readonly blockService: BlockService) {}
-
-  @Post()
-  async blockUser(@Req() req, @Body() body: { blockedId: number }) {
-    const blockerId = req?.user?.userId; // JWT'dan user ID olinyapti
-    const { blockedId } = body;
-    return this.blockService.blockUser(blockerId, blockedId);
-  }
-
-  @Post('unblock')
-  async unblockUser(@Req() req, @Body() body: { blockedId: number }) {
-    const blockerId = req?.user?.userId;
-    const { blockedId } = body;
-    return this.blockService.unblockUser(blockerId, blockedId);
-  }
 }
