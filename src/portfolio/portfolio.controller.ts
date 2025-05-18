@@ -20,6 +20,7 @@ import {
   ApiBody,
   ApiOperation,
   ApiResponse,
+  ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from './../auth/guards/jwt-auth.guard';
 import { PortfolioFilterDto } from './dto/filter.dto';
@@ -29,7 +30,8 @@ import { ProjectService } from './portfolio.service';
 
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
-@Controller('projects')
+@ApiTags('Portfolios')
+@Controller('portfolios')
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 

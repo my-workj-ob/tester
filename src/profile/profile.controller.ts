@@ -123,9 +123,6 @@ export class ProfileController {
       throw new NotFoundException(`Profil ${profileId} topilmadi`);
     }
 
-    // Agar ko'rilayotgan profil joriy foydalanuvchining profili bo'lmasa,
-    // profil ko'rishlari sonini oshirish
-
     if (currentUser && userProfile.id !== currentUser) {
       await this.userService.incrementProfileViews(profileId);
     }

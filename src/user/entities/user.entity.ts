@@ -25,6 +25,7 @@ import { MentorshipRequest } from './../../mentors/entities/mentorship-request.e
 import { Notification } from './../../notification/entities/notification.entity';
 import { Skill } from './../../skill/entities/skill.entity';
 import { ProfileStat } from './profile-stat.entity';
+import { Projects } from 'src/projects/entities/create-projecs.entity';
 
 @Entity()
 export class User {
@@ -62,6 +63,8 @@ export class User {
 
   @OneToMany(() => Like, (like) => like.user, { cascade: true })
   likes: Like[];
+  @OneToMany(() => Projects, (project) => project.user)
+  project: Project[];
 
   @OneToMany(() => Mentor, (mentor) => mentor.user, { cascade: true })
   mentors: Mentor[];

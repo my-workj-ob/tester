@@ -6,18 +6,7 @@ import {
   IsOptional,
   IsString,
   IsUrl,
-  ValidateNested,
 } from 'class-validator';
-
-class ImageDto {
-  @ApiProperty({ description: 'Image URL' })
-  @IsString()
-  url: string;
-
-  @ApiProperty({ description: 'Is this the main cover image?', default: false })
-  @IsBoolean()
-  isMain: boolean;
-}
 
 export class CreatePortfolioDto {
   @ApiProperty({ example: 'E-commerce Website', description: 'Loyiha nomi' })
@@ -68,7 +57,7 @@ export class CreatePortfolioDto {
   userId: number;
 
   @ApiProperty({ example: true, description: 'Own project' })
-  @IsBoolean()
+  @IsOptional()
   ownProject: boolean;
 
   @ApiProperty({ required: false })
@@ -76,11 +65,18 @@ export class CreatePortfolioDto {
   @IsUrl()
   liveDemoUrl?: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    type: [String],
+    example: [
+      'https://example.com/image1.jpg',
+      'https://example.com/image2.jpg',
+    ],
+    description: 'Loyihaga tegishli rasmlar URL ro‘yxati',
+  })
+  @IsOptional()
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => ImageDto)
-  images: ImageDto[];
+  @IsString({ each: true })
+  images?: string[];
 
   @ApiProperty({
     example: '0',

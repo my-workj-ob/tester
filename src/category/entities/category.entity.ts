@@ -10,6 +10,7 @@ import {
 import { Project } from './../../portfolio/entities/project.entity';
 import { Question } from './../../questions/entities/question.entity';
 import { Skill } from './../../skill/entities/skill.entity';
+import { Projects } from 'src/projects/entities/create-projecs.entity';
 
 @Entity()
 export class Category {
@@ -41,6 +42,9 @@ export class Category {
   })
   @Column({ nullable: true })
   parentId?: number | null;
+
+  @OneToMany(() => Projects, (project) => project.category)
+  project: Projects[];
 
   @ApiProperty({
     type: () => Category,

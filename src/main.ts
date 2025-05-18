@@ -34,8 +34,6 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       transform: true, // 👉 stringlarni avtomatik number, boolean ga o‘giradi
-      whitelist: true, // DTO'da bo‘lmagan fieldlar avtomatik olib tashlanadi
-      forbidNonWhitelisted: true, // DTO'da yo‘q field bo‘lsa xato beradi
       transformOptions: {
         enableImplicitConversion: true, // DTO'da bo‘lmagan fieldlar avtomatik olib tashlanadi
       },

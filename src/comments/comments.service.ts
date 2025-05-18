@@ -49,7 +49,6 @@ export class CommentService {
         skip: (page - 1) * limit,
       });
 
-      // Har bir komment va reply-ga `likedByCurrentUser` qo‘shamiz
       const commentsWithLikeStatus = comments.map((comment) => ({
         ...comment,
         likedByCurrentUser: comment.likes.some(
@@ -59,9 +58,11 @@ export class CommentService {
           ...reply,
           likedByCurrentUser: reply.likes.some(
             (like) => like.user.id === userId,
-          ), // ✅ Replies uchun like bor yoki yo‘qligini tekshiramiz
+          ),
         })),
       }));
+
+      //  currentUser?.user_id === comment.user_id &&
 
       return {
         comments: commentsWithLikeStatus,

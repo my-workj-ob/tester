@@ -79,8 +79,8 @@ export class Project {
   @Column({ default: 0 })
   commentsCount: number;
 
-  @Column('jsonb', { nullable: true })
-  images: { url: string; isMain: boolean }[];
+  @Column('text', { array: true, nullable: true }) // yoki jsonb ham qolsa bo‘ladi
+  images: string[];
 
   @Column({ nullable: true })
   githubUrl: string;
