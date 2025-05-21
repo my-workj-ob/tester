@@ -35,7 +35,7 @@ export class AuthService {
     try {
       return this.jwtService.sign(
         { ...user, id: user.id },
-        { expiresIn: '15m' },
+        { expiresIn: '60s' },
       );
     } catch (error) {
       throw new BadRequestException(`Error generating access token ${error}`);
@@ -73,7 +73,7 @@ export class AuthService {
       const accessToken = this.jwtService.sign(payload, { expiresIn: '30m' });
       const refreshToken = this.jwtService.sign(payload, {
         secret: 'baxtiyor08072006',
-        expiresIn: '7d',
+        expiresIn: '120s',
       });
 
       // **Refresh tokenni saqlash**
@@ -106,7 +106,7 @@ export class AuthService {
 
       const refreshToken = this.jwtService.sign(payload, {
         secret: 'baxtiyor08072006',
-        expiresIn: '7d',
+        expiresIn: '120s',
       });
 
       // **Session yaratish va saqlash**

@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Notification } from './entities/notification.entity';
+import { ConfigService } from '@nestjs/config';
+import * as OneSignal from 'onesignal-node';
 
 export type NotificationType =
   | 'NEW_CONNECTION'
@@ -14,16 +16,26 @@ export type NotificationType =
 
 @Injectable()
 export class NotificationService {
+  private readonly oneSignalClient: OneSignal.Client;
+
   constructor(
     @InjectRepository(Notification)
     private readonly notificationRepo: Repository<Notification>,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    // OneSignal Client’ni sozlash
+    this.oneSignalClient = new OneSignal.Client(
+      this.configService.get<string>('ONESIGNAL_APP_ID')!,
+      this.configService.get<string>('ONESIGNAL_REST_API_KEY')!,
+    );
+  }
 
   async createNotification(
     userId: number,
     type: NotificationType,
     message: string,
     relatedId?: number,
+    externalId?: string,
   ) {
     try {
       const notification = this.notificationRepo.create({
@@ -33,6 +45,11 @@ export class NotificationService {
         relatedId,
       });
       const savedNotification = await this.notificationRepo.save(notification);
+
+      // OneSignal orqali push notification yuborish
+      if (externalId) {
+        await this.sendPushNotification(userId, type, message, externalId);
+      }
 
       return savedNotification;
     } catch (error) {
@@ -44,12 +61,38 @@ export class NotificationService {
     }
   }
 
+  async sendPushNotification(
+    userId: number,
+    type: NotificationType,
+    message: string,
+    externalId: string,
+  ) {
+    try {
+      const notification = {
+        app_id: this.configService.get<string>('ONESIGNAL_APP_ID'),
+        include_external_user_ids: [externalId], // Foydalanuvchining external ID’si
+        contents: { en: message },
+        headings: { en: type },
+        data: { userId, type, notificationId: Date.now() }, // Qo‘shimcha ma’lumotlar
+      };
+
+      const response =
+        await this.oneSignalClient.createNotification(notification);
+      console.log(`Push notification yuborildi: ${userId}`, response);
+    } catch (error) {
+      console.error(
+        `[NotificationService] Push notification yuborishda xatolik (Foydalanuvchi ID: ${userId}):`,
+        error,
+      );
+      throw error;
+    }
+  }
+
   async getUnreadCount(userId: number) {
     try {
       const count = await this.notificationRepo.count({
         where: { userId, isRead: false },
       });
-
       return count;
     } catch (error) {
       console.error(
@@ -95,7 +138,6 @@ export class NotificationService {
         where: { userId },
         order: { createdAt: 'DESC' },
       });
-
       return notifications;
     } catch (error) {
       console.error(

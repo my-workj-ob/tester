@@ -56,6 +56,7 @@ import { ProjectsModule } from './projects/projects.module';
     ConfigModule.forRoot({
       load: [configuration],
       isGlobal: true,
+      envFilePath: '.env',
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
