@@ -30,6 +30,7 @@ export class NotificationService {
     );
   }
 
+  
   async createNotification(
     userId: number,
     type: NotificationType,
@@ -37,6 +38,8 @@ export class NotificationService {
     relatedId?: number,
     externalId?: string,
   ) {
+    console.log(process.env.ONESIGNAL_APP_ID)
+    console.log(process.env.ONESIGNAL_REST_API_KEY)
     try {
       const notification = this.notificationRepo.create({
         userId,
